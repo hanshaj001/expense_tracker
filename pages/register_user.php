@@ -8,13 +8,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         include("./includes/db_conn.php");
     // collecting data safely and trimming whitespace
     $user_name = trim($_POST['user_name']);
-    $user_password = trim($_POST['user_password']);
+    $user_password = trim($_POST['password']);
 
     // enc password
     $enc_password = password_hash($user_password,PASSWORD_BCRYPT);
 
     // inserting data into databases
-    $sql = "INSERT into reg_user(user_name,user_password)
+    $sql = "INSERT into users(user_name,password)
     values ('$user_name','$enc_password')";
 
     if(mysqli_query($conn,$sql)){

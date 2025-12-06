@@ -19,7 +19,7 @@
                 </button>
             </div>
             <nav class="sidebar-nav">
-                <a href="user_dashboard.php" class="nav-item active" data-page="dashboard">
+                <a href="user_dashboard.php" class="nav-item " data-page="dashboard">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="3" y="3" width="7" height="7"></rect>
                         <rect x="14" y="3" width="7" height="7"></rect>
@@ -28,7 +28,7 @@
                     </svg>
                     <span>Dashboard</span>
                 </a>
-                <a href="add_income.php" class="nav-item" data-page="add-income">
+                <a href="add_income.php" class="nav-item" >
                     <svg width="20" height="20" viewBox="0 0 24 24"  stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="10"></circle>
                         <line x1="12" y1="8" x2="12" y2="16"></line>
@@ -36,22 +36,16 @@
                     </svg>
                     <span>Add Income</span>
                 </a>
-                <a href="add_expense.php" class="nav-item" data-page="add-expense">
+                <a href="add_expense.php" class="nav-item">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="10"></circle>
                         <line x1="8" y1="12" x2="16" y2="12"></line>
                     </svg>
                     <span>Add Expense</span>
                 </a>
-                <a href="daily_transactions.php" class="nav-item" data-page="transactions">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M9 2H15V6H9Z"></path>
-                        <rect x="3" y="6" width="18" height="14" rx="2"></rect>
-                        <line x1="12" y1="10" x2="12" y2="16"></line>
-                    </svg>
-                    <span>Daily Transactions</span>
+    
                 </a>
-                <a href="#categories" class="nav-item" data-page="categories">
+                <a href="categories.php" class="nav-item" >
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="3" y="3" width="8" height="8"></rect>
                         <rect x="13" y="3" width="8" height="8"></rect>

@@ -1,4 +1,3 @@
-
 <?php
 include("../includes/header.php");
 include("../includes/function.php");
@@ -11,11 +10,9 @@ include("../includes/sidebar.php");
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expense Tracker Dashboard</title>
     <link rel="stylesheet" href="../assets/css/style.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 </head>
 <body>
     <div class="container">
-
         <!-- Main Content -->
         <main class="main-content">
             <!-- Header -->
@@ -26,8 +23,8 @@ include("../includes/sidebar.php");
                 </div>
                 <div class="header-right">
                     <div class="user-profile">
-                        <div class="avatar">JD</div>
-                        <span>John Doe</span>
+                        <div class="avatar">HR</div>
+                        <span>UserName</span>
                     </div>
                 </div>
             </header>
@@ -35,7 +32,7 @@ include("../includes/sidebar.php");
             <!-- Page Content -->
             <div class="pages-container">
                 <!-- Dashboard Page -->
-                <div id="dashboard-page" class="page active">
+                <div class="page active">
                     <!-- Summary Cards -->
                     <section class="summary-section">
                         <h2 class="section-title">Financial Overview</h2>
@@ -51,7 +48,7 @@ include("../includes/sidebar.php");
                                 </div>
                                 <div class="card-content">
                                     <p class="card-label">Total Income</p>
-                                    <h3 class="card-amount" id="totalIncome">$0.00</h3>
+                                    <h3 class="card-amount">$5,250.00</h3>
                                     <span class="card-meta">All time</span>
                                 </div>
                             </div>
@@ -65,7 +62,7 @@ include("../includes/sidebar.php");
                                 </div>
                                 <div class="card-content">
                                     <p class="card-label">Total Expense</p>
-                                    <h3 class="card-amount" id="totalExpense">$0.00</h3>
+                                    <h3 class="card-amount">$3,180.00</h3>
                                     <span class="card-meta">All time</span>
                                 </div>
                             </div>
@@ -79,7 +76,7 @@ include("../includes/sidebar.php");
                                 </div>
                                 <div class="card-content">
                                     <p class="card-label">Balance</p>
-                                    <h3 class="card-amount" id="balance">$0.00</h3>
+                                    <h3 class="card-amount">$2,070.00</h3>
                                     <span class="card-meta">Current</span>
                                 </div>
                             </div>
@@ -95,27 +92,8 @@ include("../includes/sidebar.php");
                                 </div>
                                 <div class="card-content">
                                     <p class="card-label">Today's Expense</p>
-                                    <h3 class="card-amount" id="todayExpense">$0.00</h3>
+                                    <h3 class="card-amount">$125.00</h3>
                                     <span class="card-meta">Today</span>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Charts Section -->
-                    <section class="charts-section">
-                        <h2 class="section-title">Analytics</h2>
-                        <div class="charts-grid">
-                            <div class="chart-container">
-                                <h3>Income vs Expense</h3>
-                                <div class="chart-wrapper">
-                                    <canvas id="incomeExpenseChart"></canvas>
-                                </div>
-                            </div>
-                            <div class="chart-container">
-                                <h3>Expense by Category</h3>
-                                <div class="chart-wrapper">
-                                    <canvas id="categoryChart"></canvas>
                                 </div>
                             </div>
                         </div>
@@ -133,193 +111,37 @@ include("../includes/sidebar.php");
                                         <th>Category</th>
                                         <th>Amount</th>
                                         <th>Date</th>
-                                        <th>Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody id="recentTransactions">
-                                    <tr class="empty-state">
-                                        <td colspan="6">No transactions yet</td>
+                                <tbody>
+                                    <tr>
+                                        <td>Salary Payment</td>
+                                        <td><span class="type-badge income">Income</span></td>
+                                        <td>Salary</td>
+                                        <td>$5,000.00</td>
+                                        <td>Nov 28, 2025</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Grocery Shopping</td>
+                                        <td><span class="type-badge expense">Expense</span></td>
+                                        <td>Food</td>
+                                        <td>$85.50</td>
+                                        <td>Nov 27, 2025</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Electric Bill</td>
+                                        <td><span class="type-badge expense">Expense</span></td>
+                                        <td>Utilities</td>
+                                        <td>$120.00</td>
+                                        <td>Nov 26, 2025</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </section>
                 </div>
-
-                <!-- Daily Transactions Page -->
-                <div id="transactions-page" class="page">
-                    <div class="transactions-container">
-                        <h2>Daily Transactions</h2>
-                        <div class="filters">
-                            <div class="filter-group">
-                                <label for="transactionDate">Select Date</label>
-                                <input type="date" id="transactionDate">
-                            </div>
-                            <div class="filter-group">
-                                <label for="transactionType">Type</label>
-                                <select id="transactionType">
-                                    <option value="">All</option>
-                                    <option value="Income">Income</option>
-                                    <option value="Expense">Expense</option>
-                                </select>
-                            </div>
-                            <div class="filter-group">
-                                <label for="transactionCategory">Category</label>
-                                <select id="transactionCategory"></select>
-                            </div>
-                        </div>
-
-                        <div class="daily-summary">
-                            <div class="summary-stat">
-                                <span class="stat-label">Daily Income</span>
-                                <span class="stat-value income" id="dailyIncome">$0.00</span>
-                            </div>
-                            <div class="summary-stat">
-                                <span class="stat-label">Daily Expense</span>
-                                <span class="stat-value expense" id="dailyExpense">$0.00</span>
-                            </div>
-                            <div class="summary-stat">
-                                <span class="stat-label">Daily Balance</span>
-                                <span class="stat-value" id="dailyBalance">$0.00</span>
-                            </div>
-                        </div>
-
-                        <div class="table-wrapper">
-                            <table class="transactions-table">
-                                <thead>
-                                    <tr>
-                                        <th>Title</th>
-                                        <th>Type</th>
-                                        <th>Category</th>
-                                        <th>Amount</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="dailyTransactions">
-                                    <tr class="empty-state">
-                                        <td colspan="5">No transactions for this date</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Categories Page -->
-                <div id="categories-page" class="page">
-                    <div class="categories-container">
-                        <h2>Manage Categories</h2>
-                        <button class="btn btn-primary" id="addCategoryBtn">Add New Category</button>
-
-                        <div class="categories-grid">
-                            <div id="categoriesList"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Settings Page -->
-                <div id="settings-page" class="page">
-                    <div class="settings-container">
-                        <h2>Settings</h2>
-                        <div class="settings-group">
-                            <h3>Application Settings</h3>
-                            <div class="setting-item">
-                                <label>
-                                    <input type="checkbox" id="darkMode"> Dark Mode
-                                </label>
-                            </div>
-                            <div class="setting-item">
-                                <button class="btn btn-secondary" id="exportData">Export Data as JSON</button>
-                            </div>
-                            <div class="setting-item">
-                                <button class="btn btn-danger" id="clearData">Clear All Data</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </main>
-    </div>
-
-    <!-- Modals -->
-    <!-- Edit Transaction Modal -->
-    <div id="editModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Edit Transaction</h3>
-                <button class="modal-close">&times;</button>
-            </div>
-            <form id="editForm" class="transaction-form">
-                <input type="hidden" id="editId">
-                <div class="form-group">
-                    <label for="editTitle">Title</label>
-                    <input type="text" id="editTitle" required>
-                </div>
-                <div class="form-group">
-                    <label for="editAmount">Amount</label>
-                    <input type="number" id="editAmount" required step="0.01" min="0">
-                </div>
-                <div class="form-group" id="editCategoryGroup" style="display:none;">
-                    <label for="editCategory">Category</label>
-                    <select id="editCategory"></select>
-                </div>
-                <div class="form-group">
-                    <label for="editDate">Date</label>
-                    <input type="date" id="editDate" required>
-                </div>
-                <div class="form-group">
-                    <label for="editNotes">Notes</label>
-                    <textarea id="editNotes"></textarea>
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                    <button type="button" class="btn btn-secondary modal-close-btn">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div id="deleteModal" class="modal">
-        <div class="modal-content modal-small">
-            <div class="modal-header">
-                <h3>Confirm Delete</h3>
-                <button class="modal-close">&times;</button>
-            </div>
-            <p id="deleteMessage">Are you sure you want to delete this transaction?</p>
-            <div class="form-actions">
-                <button id="confirmDelete" class="btn btn-danger">Delete</button>
-                <button class="btn btn-secondary modal-close-btn">Cancel</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Add Category Modal -->
-    <div id="addCategoryModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Add New Category</h3>
-                <button class="modal-close">&times;</button>
-            </div>
-            <form id="addCategoryForm" class="transaction-form">
-                <div class="form-group">
-                    <label for="categoryName">Category Name</label>
-                    <input type="text" id="categoryName" required placeholder="e.g., Entertainment">
-                </div>
-                <div class="form-group">
-                    <label for="categoryColor">Color</label>
-                    <input type="color" id="categoryColor" value="#3B82F6">
-                </div>
-                <div class="form-group">
-                    <label for="categoryDescription">Description</label>
-                    <textarea id="categoryDescription" placeholder="Brief description..."></textarea>
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Add Category</button>
-                    <button type="button" class="btn btn-secondary modal-close-btn">Cancel</button>
-                </div>
-            </form>
-        </div>
     </div>
 </body>
 </html>

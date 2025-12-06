@@ -9,10 +9,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // collecting data safely and trimming whitespace
     $user_name = trim($_POST['user_name']);
-    $user_password = trim($_POST['user_password']);
+    $user_password = trim($_POST['password']);
     
     // SQL query with placeholder
-    $sql = "SELECT * FROM reg_user WHERE user_name = ?";
+    $sql = "SELECT * FROM users WHERE user_name = ?";
     $stmt = mysqli_prepare($conn, $sql);
 
     // binds the value to the placeholder
@@ -28,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ( mysqli_num_rows($result) == 1) {
 
         $row = mysqli_fetch_assoc($result);
-        $db_user_password = $row['user_password'];
+        $db_user_password = $row['password'];
         $db_user_name = $row['user_name'];
         $db_user_img = $row['user_img'];
         

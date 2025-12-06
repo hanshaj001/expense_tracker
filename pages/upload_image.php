@@ -10,8 +10,8 @@ include("./includes/db_conn.php");
 
 $userId = null;
 
-if (isset($_REQUEST['id'])) {
-    $userId = $_REQUEST['id'];
+if (isset($_REQUEST['user_id'])) {
+    $userId = $_REQUEST['user_id'];
 }
 // Checking if the form is submitted using the "submit" button
 if (isset($_REQUEST['submit'])) {
@@ -43,7 +43,7 @@ if (isset($_REQUEST['submit'])) {
 
     //
     if ($img_upload_result) {
-        $run_image_query = "UPDATE reg_user  SET user_img = '$img_new_name' WHERE id = $userId";
+        $run_image_query = "UPDATE reg_user  SET user_img = '$img_new_name' WHERE user_id = $userId";
 
         $img_update_result = mysqli_query($conn, $run_image_query);
 

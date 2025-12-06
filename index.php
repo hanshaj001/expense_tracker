@@ -275,8 +275,7 @@ include("./includes/db_conn.php");
 
 
 
-
-
+ 
 
 
   <!-- Outer centered panel that imitates the rounded white card in your image -->
@@ -295,8 +294,8 @@ include("./includes/db_conn.php");
 
 
         <div class="auth-actions">
-          <a class="btn-signup" href="register_user.php">Sign up</a>
-          <a class="btn-signin" href="login.php">Sign in</a>
+          <a class="btn-signup" href="pages/register_user.php">Sign up</a>
+          <a class="btn-signin" href="pages/login.php">Sign in</a>
         </div>
       </header>
 

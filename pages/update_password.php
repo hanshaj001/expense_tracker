@@ -12,7 +12,7 @@ if(isset($_REQUEST['password_update_id'])){
 
   
    // for getting username
-   $fetch = "SELECT user_name from reg_user where id = $password_update_id";
+   $fetch = "SELECT user_name from users where user_id = $password_update_id";
    $run_fetch_query = mysqli_query($conn,$fetch);
 
    // show array    
@@ -30,7 +30,7 @@ if(isset($_REQUEST['password_update_id'])){
         $update_user_password = $_POST['update_user_password'];
         
         // query to change pass
-         $password_update_query = " UPDATE reg_user set user_password = '$update_user_password' where id = $password_update_id ";
+         $password_update_query = " UPDATE reg_user set password = '$update_user_password' where user_id = $password_update_id ";
 
         $run_password_query= mysqli_query($conn,$password_update_query);
 
