@@ -79,7 +79,7 @@ mysqli_close($conn);
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Password</label>
-                            <input type="password" name="user_password" placeholder="Enter password" class="form-control" required>
+                            <input type="password" name="password" placeholder="Enter password" class="form-control" required>
                         </div>
                         <div class="mb-3">
                             <button type="submit" class="btn btn-primary w-100">Login</button>

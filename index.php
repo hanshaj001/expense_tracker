@@ -1,344 +1,144 @@
-
 <?php
-
 include("./includes/header.php");
 include("./includes/function.php");
 include("./includes/db_conn.php");
 
+session_start();
+/// taking inputs 
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+    // collecting data safely and trimming whitespace
+    $user_name = trim($_POST['user_name']);
+    $user_password = trim($_POST['password']);
+    
+    // SQL query with placeholder
+    $sql = "SELECT * FROM users WHERE user_name = ?";
+    $stmt = mysqli_prepare($conn, $sql);
+
+    // binds the value to the placeholder
+    mysqli_stmt_bind_param($stmt, "s", $user_name);
+
+    // Execute the prepared statement
+    mysqli_stmt_execute($stmt);
+
+    // Get the result
+    $result = mysqli_stmt_get_result($stmt);
+
+    // checking if there is only one row
+    if ( mysqli_num_rows($result) == 1) {
+
+        $row = mysqli_fetch_assoc($result);
+        $db_user_password = $row['password'];
+        $db_user_name = $row['user_name'];
+        $db_user_img = $row['user_img'];
+        
+        // comparing password
+        if (password_verify($user_password, $db_user_password)) {
+
+            // creating a variable to store in session
+            $_SESSION['user_name'] = $db_user_name;
+            $_SESSION['user_img'] = $db_user_img;
+            $_SESSION['is_login'] = true;
+
+
+            my_alert("success", "Login Successfully");
+            header("Location: ./pages/user_dashboard.php");
+            exit();
+        } else {
+            my_alert("danger", "Invalid username or password");
+        }
+
+    } else {
+        my_alert("danger", "Username not found");
+    }
+
+    // proper close inside POST block
+    mysqli_stmt_close($stmt);
+}
+
+mysqli_close($conn);
 ?>
+
+<!DOCTYPE html>
+<html lang="en">
 <head>
-     <title>Prime Ledger</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In</title>
+    <link rel="stylesheet" href="./assets/css/index.css">
 </head>
-   
-  <style>
-    /* Root color tokens */
-    :root{
-      --bg-top: #d9fbddff;    /* soft top gradient */
-      --bg-bottom: #cfeafe; /* soft bottom gradient */
-      --primary: #009d3cff;   /* teal-ish accent used in image */
-      --cta: #000b87ff;       /* CTA color */
-      --muted: #77838f;
-      --panel-white: #ffffff;
-      --rounded: 28px;
-      --max-width: 1200px;
-    }
+<body>
+    <!-- Decorative circles -->
+    <div class="circle circle-1"></div>
+    <div class="circle circle-2"></div>
+    <div class="circle circle-3"></div>
+    <div class="circle circle-4"></div>
 
-    /* Page background gradient */
-    body{
-      font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background: linear-gradient(180deg,var(--bg-top), var(--bg-bottom));
-      min-height: 100vh;
-      margin: 0;
-      color: #0f1720;
-    }
-
-    /* Center the main rounded panel */
-    .page-wrap{
-      display: flex;
-      justify-content: center;
-      padding: 48px 20px;
-    }
-
-    .panel {
-      width: 100%;
-      max-width: var(--max-width);
-      background: var(--panel-white);
-      border-radius: var(--rounded);
-      box-shadow: 0 18px 36px rgba(16,64,104,0.12);
-      padding: 36px;
-      overflow: visible;
-      position: relative;
-    }
-
-    /* subtle top-left logo position */
-    .site-nav{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 16px;
-      margin-bottom: 18px;
-    }
-    .site-brand{
-      display:flex;
-      align-items:center;
-      gap:12px;
-    }
-    .brand-mark{
-      width:48px;
-      height:48px;
-      border-radius:10px;
-      background: linear-gradient(135deg,var(--primary), #2f5800ff);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:white;
-      font-weight:700;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-    }
-    .nav-links{
-      display:flex;
-      gap:22px;
-      align-items:center;
-      justify-content:center;
-      flex:1;
-    }
-    .nav-links a{
-      color: #7a8a92;
-      text-decoration:none;
-      font-weight:600;
-      font-size:0.95rem;
-    }
-
-    /* Buttons right */
-    .auth-actions{
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
-    .btn-signup{
-      border-radius: 999px;
-      padding: .45rem .9rem;
-      border: 2px solid var(--primary);
-      background: transparent;
-      color: var(--primary);
-      font-weight:600;
-      text-decoration:none;
-    }
-    .btn-signin{
-      border-radius: 999px;
-      padding: .55rem 1rem;
-      background: var(--primary);
-      color:white;
-      font-weight:700;
-      text-decoration:none;
-      box-shadow: 0 8px 18px rgba(0,168,216,0.14);
-    }
-
-    /* Hero grid */
-    .hero-row{
-      display:grid;
-      grid-template-columns: 1fr 520px;
-      gap: 28px;
-      align-items:center;
-      padding: 10px 4px 18px;
-    }
-
-    /* Left column */
-    .hero-title{
-      font-size: clamp(1.9rem, 3.6vw, 3.25rem);
-      line-height:1.02;
-      font-weight:800;
-      color: #007a9e; /* bold teal similar to image */
-      margin: 0 0 14px 0;
-    }
-    .hero-sub{
-      font-size: 1.05rem;
-      color: #4b5563;
-      margin-bottom: 22px;
-      max-width: 62ch;
-    }
-
-    .cta-row{
-      display:flex;
-      gap:12px;
-      align-items:center;
-      margin-top: 10px;
-    }
-
-    .btn-primary-cta{
-      background: linear-gradient(90deg,var(--cta), #00a3c6);
-      color:white;
-      border: none;
-      padding: .7rem 1.4rem;
-      border-radius: 999px;
-      font-weight:700;
-      text-decoration:none;
-      display:inline-block;
-    }
-    .btn-secondary-ghost{
-      background:transparent;
-      border:2px solid #cfeff7;
-      color:var(--muted);
-      padding:.6rem 1.2rem;
-      border-radius: 999px;
-      text-decoration:none;
-      font-weight:600;
-    }
-
-    /* Right illustration container (to match image proportions) */
-    .hero-illustration{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      position:relative;
-      padding: 10px;
-    }
-    .hero-illustration img{
-      width:100%;
-      height:auto;
-      max-width:520px;
-      border-radius: 12px;
-      display:block;
-    }
-
-    /* Small decorative bullets under hero (like the small dots) */
-    .hero-indicators{
-      position:absolute;
-      left:50%;
-      transform:translateX(-50%);
-      bottom:-26px;
-      display:flex;
-      gap:12px;
-      align-items:center;
-    }
-    .dot{
-      width:14px;
-      height:14px;
-      border-radius:50%;
-      background: linear-gradient(90deg,#cfeff7, #e6fbff);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-      display:inline-block;
-    }
-    .dot.active{
-      width:36px;
-      height:14px;
-      border-radius:20px;
-      background: linear-gradient(90deg,var(--primary), #00c0e6);
-    }
-
-    /* Features grid below */
-    .features{
-      margin-top: 46px;
-    }
-    .feature-card{
-      display:flex;
-      gap:14px;
-      align-items:flex-start;
-      background: #fafbfc;
-      border-radius: 12px;
-      padding: 18px;
-    }
-    .feature-icon{
-      width:56px;
-      height:56px;
-      border-radius:10px;
-      background: linear-gradient(135deg,#e6f7fb,#eaf8ff);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:1.25rem;
-      color: var(--primary);
-      font-weight:700;
-    }
-    .feature-title{
-      font-weight:700;
-      margin:0 0 6px 0;
-    }
-    .feature-desc{
-      margin:0;
-      color: #58656f;
-      font-size:0.95rem;
-    }
-
-    /* Footer */
-    footer{
-      margin-top: 40px;
-      text-align:center;
-      color: #6b7780;
-      font-size: 0.9rem;
-    }
-
-    /* Responsive tweaks */
-    @media (max-width: 1000px){
-      .hero-row{
-        grid-template-columns: 1fr 420px;
-      }
-      .panel{
-        padding: 28px;
-      }
-    }
-    @media (max-width: 820px){
-      .hero-row{
-        grid-template-columns: 1fr;
-        gap: 18px;
-      }
-      .hero-indicators{ bottom:-18px; }
-      .panel{ padding:20px; border-radius:20px; }
-    }
-    @media (max-width: 420px){
-      .nav-links{ display:none; } /* hide center nav on small screens */
-      .brand-mark{ width:40px; height:40px; font-size:0.9rem; }
-      .hero-title{ font-size:1.6rem; }
-      .hero-sub{ font-size:0.98rem; }
-    }
-  </style>
-
-
-
- 
-
-
-  <!-- Outer centered panel that imitates the rounded white card in your image -->
-  <div class="page-wrap">
-    <div class="panel" role="main" aria-label="Landing panel">
-
-      <!-- Navigation -->
-      <header class="site-nav" aria-hidden="false">
-        <div class="site-brand">
-          <div class="brand-mark" aria-hidden="true">HR</div>
-          <div>
-              <div style="font-size:.82rem; color:var(--muted); margin-top:2px;">Hello</div>
-            <div style="font-weight:800; font-size:1.05rem;">Hansh</div>
-          </div>
+    <div class="container">
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <div class="welcome-content">
+                <h1>Expense Tracker</h1>
+                <p class="subtitle">Manage Your Finance</p>
+            </div>
         </div>
 
+        <!-- Login Section -->
+        <div class="login-section">
+            <h2>Sign in</h2>
+            <p class="description"></p>
 
-        <div class="auth-actions">
-          <a class="btn-signup" href="pages/register_user.php">Sign up</a>
-          <a class="btn-signin" href="pages/login.php">Sign in</a>
+            <!-- BACKEND FORM START -->
+            <form id="loginForm" method="POST" action="">
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <span class="input-icon">👤</span>
+                        <input type="text" id="user_name" name="user_name" placeholder="User Name" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-wrapper password-wrapper">
+                        <span class="input-icon"></span>
+                        <input type="password" id="password" name="password" placeholder="Password" required>
+                        <button type="button" class="show-password" onclick="togglePassword()">SHOW</button>
+                    </div>
+                </div>
+<!-- 
+                <div class="form-options">
+                    <label class="remember-me">
+                        <input type="checkbox" name="remember" id="remember">
+                        <span>Remember me</span>
+                    </label>
+                    <a href="#" class="forgot-password">Forgot Password?</a>
+                </div> -->
+
+                <button type="submit" class="btn-signin">Sing in</button>
+            </form>
+            <!-- BACKEND FORM END -->
+
+            <div class="divider">OR</div>
+
+            <div class="signup-link">
+                Don't have an account? <a href="./pages/register_user.php">Sign Up</a>
+            </div>
         </div>
-      </header>
-
-      <!-- Hero -->
-      <section class="hero-row" aria-label="Hero section">
-        <!-- Left column: text -->
-        <div>
-
-        <div style="padding: 0%; margin-top: 0;">
-<p class="hero-title" style="font-size: 100px; font-weight: 900; color:black;margin: 0;">  Prime
-              <p style="font-size: 60px; font-weight: 900; color:green;"> Legder</p></p>
-        </div>
-          <p class="hero-sub">
-            Powerful, private and simple tools to manage your money — track transactions,
-            store receipts, and view clear reports. Start with a free account and stay in control.
-          </p>
-
-          <div class="cta-row">
-            <a class="btn-primary-cta" href="register.php" role="button">LEARN MORE →</a>
-            <a class="btn-secondary-ghost" href="login.php">Sign in</a>
-          </div>
-        </div>
-
-        <!-- Right column: illustration -->
-        <div class="hero-illustration" aria-hidden="true">
-          <!-- Replace the image path below with your actual image path -->
-          <img src="./images/landingImage.png " alt="Finance illustration" />
-        </div>
-
-        <!-- Decorative indicators centered under hero -->
-        <div class="hero-indicators" aria-hidden="true">
-          <span class="dot"></span>
-          <span class="dot active"></span>
-          <span class="dot"></span>
-        </div>
-      </section>
-
-      <!-- Footer -->
-      <footer class="mt-4">
-        <small>© Tracker</small>
-      </footer>
-
     </div>
-  </div>
 
-
+    <script>
+        function togglePassword() {
+            const passwordField = document.getElementById('password');
+            const btn = document.querySelector('.show-password');
+            
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                btn.textContent = 'HIDE';
+            } else {
+                passwordField.type = 'password';
+                btn.textContent = 'SHOW';
+            }
+        }
+        // BACKEND JAVASCRIPT END
+    </script>
+</body>
+</html>
