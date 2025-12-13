@@ -214,28 +214,6 @@
             font-size: 12px;
         }
 
-        .remember-me {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .remember-me input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-        }
-
-        .forgot-password {
-            color: #666;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .forgot-password:hover {
-            color: #0066cc;
-        }
-
         .btn-signin {
             width: 100%;
             padding: 14px;
@@ -253,50 +231,6 @@
         .btn-signin:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0, 102, 204, 0.3);
-        }
-
-        .divider {
-            text-align: center;
-            margin: 20px 0;
-            color: #999;
-            font-size: 12px;
-            position: relative;
-        }
-
-        .divider::before,
-        .divider::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            width: 40%;
-            height: 1px;
-            background: #ddd;
-        }
-
-        .divider::before {
-            left: 0;
-        }
-
-        .divider::after {
-            right: 0;
-        }
-
-        .btn-other {
-            width: 100%;
-            padding: 12px;
-            background: white;
-            color: #333;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.3s, border-color 0.3s;
-        }
-
-        .btn-other:hover {
-            background: #f8f8f8;
-            border-color: #ccc;
         }
 
         .signup-link {

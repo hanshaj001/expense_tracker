@@ -5,6 +5,7 @@
 }
 
 body{
+    font-family: Arial, Helvetica, sans-serif;
     background-color: rgb(238, 238, 238);
 }
 .register-card{
@@ -14,3 +15,7 @@ body{
     transform: translate(-50%,-50%);
     width: 400px;
 }
+
+
+/* for navbar */ 
+/* Professional navbar customization */
