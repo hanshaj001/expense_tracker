@@ -24,67 +24,76 @@
     >
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="../assets/css/styles.css">
-</head>
+   <link rel="stylesheet" href="/EXPANSE_TRACKER/assets/styles.css">
+
 <body>
+ <?php
+$currentPage = basename($_SERVER['PHP_SELF']);
+?>
 
+<div class="et-sidebar">
 
+    <div class="et-app-header">
+        <span class="et-logo">Expense Tracker</span>
+    </div>
 
-     <nav class="navbar navbar-expand-lg">
-        <div class="container-fluid">
-            <!-- Logo and Brand Name -->
-            <a class="navbar-brand" href="#">
-                <i class="bi bi-wallet2"></i>
-                Expense Tracker
+    <div class="et-section-title">Business</div>
+
+    <ul class="nav flex-column et-menu">
+
+        <li class="nav-item">
+            <a class="nav-link <?= ($currentPage=='user_dashboard.php')?'active':'' ?>" href="user_dashboard.php">
+                <i class="bi bi-grid"></i>
+                Dashboard
             </a>
+        </li>
 
-            <!-- Mobile Toggle Button -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+        <li class="nav-item">
+            <a class="nav-link <?= ($currentPage=='add_income.php')?'active':'' ?>" href="add_income.php">
+                <i class="bi bi-cash"></i>
+                Income
+            </a>
+        </li>
 
-            <!-- Navigation Links -->
-            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-                <ul class="navbar-nav align-items-lg-center gap-2">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#home">
-                            <i class="bi bi-house-door"></i>
-                            Home
-                        </a>
-                    </li>   
-                    <li class="nav-item">
-                        <a class="nav-link" href="#add-expense">
-                            <i class="bi bi-plus-circle"></i>
-                            Add Expense
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#categories">
-                            <i class="bi bi-grid"></i>
-                            Categories
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#recent">
-                            <i class="bi bi-clock-history"></i>
-                            Recent Transactions
-                        </a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-person-circle"></i>
-                            Account
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li>
-                                <a class="dropdown-item" href="#logout">
-                                    <i class="bi bi-box-arrow-right"></i>
-                                    Logout
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+        <li class="nav-item">
+            <a class="nav-link <?= ($currentPage=='add_expense.php')?'active':'' ?>" href="add_expense.php">
+                <i class="bi bi-credit-card"></i>
+                Expense
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link <?= ($currentPage=='categories.php')?'active':'' ?>" href="categories.php">
+                <i class="bi bi-bar-chart"></i>
+                Categories
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link <?= ($currentPage=='transaction.php')?'active':'' ?>" href="transaction.php">
+                <i class="bi bi-bar-chart"></i>
+               Transactions
+            </a>
+        </li>
+
+    </ul>
+
+    <div class="et-section-title">Others</div>
+
+    <ul class="nav flex-column et-menu">
+        <li class="nav-item">
+            <a class="nav-link <?= ($currentPage=='profile.php')?'active':'' ?>" href="profile.php">
+                <i class="bi bi-person"></i>
+                Profile
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link logout" href="logout.php">
+                <i class="bi bi-box-arrow-right"></i>
+                Logout
+            </a>
+        </li>
+    </ul>
+
+</div>

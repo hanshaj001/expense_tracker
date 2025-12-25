@@ -17,5 +17,86 @@ body{
 }
 
 
-/* for navbar */ 
-/* Professional navbar customization */
+/* Sidebar container */
+/* ===== Sidebar Wrapper ===== */
+.et-sidebar {
+    width: 260px;
+    height: 100vh;
+    background: #ffffff;
+    position: fixed;
+    left: 0;
+    top: 0;
+    padding: 18px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.08); /* soft shadow */
+    border-radius: 0 12px 12px 0;
+}
+
+/* ===== App Header ===== */
+.et-app-header {
+    font-size: 20px;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 25px;
+}
+
+/* ===== Section Title ===== */
+.et-section-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #9ca3af;
+    text-transform: uppercase;
+    margin: 20px 0 10px;
+}
+
+/* ===== Menu ===== */
+.et-menu .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    margin-bottom: 6px;
+    font-size: 15px;
+    color: #4b5563;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+/* Icons */
+.et-menu .nav-link i {
+    font-size: 18px;
+}
+
+/* Hover */
+.et-menu .nav-link:hover {
+    background: #f3f4f6;
+    color: #111827;
+}
+
+/* ===== ACTIVE TAB ===== */
+.et-menu .nav-link.active {
+    background: #37add1;  /*  highlight  */
+    color: #ffffff;
+    font-weight: 500;
+}
+
+/* Active icon color */
+.et-menu .nav-link.active i {
+    color: #ffffff;
+}
+
+/* Logout */
+.et-menu .nav-link.logout {
+    color: #dc2626;
+}
+
+.et-menu .nav-link.logout:hover {
+    background: #fee2e2;
+}
+
+/* ===== Main Content Offset ===== */
+.et-main-content {
+    margin-left: 260px;
+    padding: 25px;
+    background: #f9fafb;
+    min-height: 100vh;
+}

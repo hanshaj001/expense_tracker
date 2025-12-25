@@ -1,0 +1,74 @@
+
+
+/* Card wrapper */
+.et-form-card {
+    background: #ffffff;
+    max-width: 650px;
+    padding: 30px;
+    border-radius: 14px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+/* Form title */
+.et-form-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 25px;
+}
+
+/* Form group */
+.et-form-group {
+    margin-bottom: 18px;
+}
+
+/* Labels */
+.et-form-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 6px;
+}
+
+/* Inputs */
+.et-form-group input,
+.et-form-group select,
+.et-form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+    outline: none;
+}
+
+/* Focus state */
+.et-form-group input:focus,
+.et-form-group select:focus,
+.et-form-group textarea:focus {
+    border-color: #37add1;
+    box-shadow: 0 0 0 2px rgba(52,179,153,0.2);
+}
+
+/* Button */
+.et-btn-primary {
+    background: #37add1;
+    color: #ffffff;
+    padding: 10px 22px;
+    border-radius: 8px;
+    border: none;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.et-btn-primary:hover {
+    background: #37add1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .et-form-card {
+        padding: 20px;
+    }
+}
