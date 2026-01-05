@@ -3,7 +3,7 @@ include("../includes/db_conn.php");
 include("../includes/header.php");
 
     
-if($_SERVER['REMOTE_HOST']=="POST"){
+if($_SERVER['REQUEST_METHOD']=="POST"){
     
 }
 
@@ -27,11 +27,7 @@ if($_SERVER['REMOTE_HOST']=="POST"){
 
         <form method="POST" action="" class="et-form">
 
-            <div class="et-form-group">
-                <label>Income Title</label>
-                <input type="text" name="title" placeholder="Salary, Business, Freelance" required>
-            </div>
-
+        
             <div class="et-form-group">
                 <label>Amount</label>
                 <input type="number" name="amount" placeholder="Enter amount" required>
@@ -40,12 +36,18 @@ if($_SERVER['REMOTE_HOST']=="POST"){
             <div class="et-form-group">
                 <label>Category</label>
                 <select name="category" required>
-                    <option value="">Select Category</option>
-                    <option value="Salary">Salary</option>
-                    <option value="Business">Business</option>
-                    <option value="Freelance">Freelance</option>
-                    <option value="Other">Other</option>
-                </select>
+                            <option value="Salary">Salary</option>
+                            <option value="Business Income">Business Income</option>
+                            <option value="Freelance Work">Freelance Work</option>
+                            <option value="Investment Returns">Investment Returns</option>
+                            <option value="Rental Income">Rental Income</option>
+                            <option value="Bonus">Bonus</option>
+                            <option value="Interest Income">Interest Income</option>
+                            <option value="Gifts Received">Gifts Received</option>
+                            <option value="Dividends">Dividends</option>
+                            <option value="Other Income">Other Income</option>
+
+           </select>
             </div>
 
             <div class="et-form-group">

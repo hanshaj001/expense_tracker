@@ -54,7 +54,7 @@ if(mysqli_num_rows($expense_result)==1){
             <p class="subtitle">Here's your financial overview for this month</p>
         </div>
         <div class="header-date">
-            <span id="currentDate"></span>
+            <span id="currentDate"><?php echo date(" F d Y"); ?></span>
         </div>
     </div>
 

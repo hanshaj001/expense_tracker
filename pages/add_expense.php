@@ -20,11 +20,6 @@ include("../includes/header.php");
         <form method="POST" action="add_income.php" class="et-form">
 
             <div class="et-form-group">
-                <label>Expense Title</label>
-                <input type="text" name="title" placeholder="Salary, Business, Freelance" required>
-            </div>
-
-            <div class="et-form-group">
                 <label>Amount</label>
                 <input type="number" name="amount" placeholder="Enter amount" required>
             </div>
@@ -32,11 +27,17 @@ include("../includes/header.php");
             <div class="et-form-group">
                 <label>Category</label>
                 <select name="category" required>
-                    <option value="">Select Category</option>
-                    <option value="Rent">Rent</option>
-                    <option value="Education">Education</option>
-                    <option value="Travel">Travel</option>
-                    <option value="Other">Other</option>
+                  <option value="">--Select Expense Category--</option>
+                            <option value="food_groceries">Food & Groceries</option>
+                            <option value="rent_mortgage">Rent / Mortgage</option>
+                            <option value="utilities">Utilities (Electricity, Water, Gas)</option>
+                            <option value="transportation">Transportation</option>
+                            <option value="entertainment">Entertainment</option>
+                            <option value="health_medical">Health / Medical</option>
+                            <option value="education_tuition">Education / Tuition</option>
+                            <option value="shopping_personal_care">Shopping / Personal Care</option>
+                            <option value="travel_vacation">Travel / Vacation</option>
+                            <option value="other_expenses">Other Expenses</option>
                 </select>
             </div>
 

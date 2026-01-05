@@ -29,14 +29,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $row = mysqli_fetch_assoc($result);
         $db_user_password = $row['password'];
         $db_user_name = $row['user_name'];
-        $db_user_img = $row['user_img'];
-        
+
         // comparing password
         if (password_verify($user_password, $db_user_password)) {
 
             // creating a variable to store in session
             $_SESSION['user_name'] = $db_user_name;
-            $_SESSION['user_img'] = $db_user_img;
             $_SESSION['is_login'] = true;
 
 
@@ -64,7 +62,7 @@ mysqli_close($conn);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign In</title>
-    <link rel="stylesheet" href="assets/index.css">
+    <link rel="stylesheet" href="/EXPANSE_TRACKER/assets/index.css">
 </head>
 <body>
     <!-- Decorative circles -->
