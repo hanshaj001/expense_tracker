@@ -1,11 +1,17 @@
 <?php
+session_start();
 include("../includes/db_conn.php");
 include("../includes/header.php");
 
+
+$user_id = $_SESSION['user_id'];
+
 // total income fetiching
-$total_income_sql = "SELECT sum(amount)  as total_income from add_income
-where month(created_at) = month(current_date())
-and year(created_at) = year(curdate())";
+$total_income_sql = "SELECT SUM(amount) AS total_income
+FROM add_income
+WHERE user_id = $user_id
+AND MONTH(created_at) = MONTH(CURDATE())
+AND YEAR(created_at) = YEAR(CURDATE())";
 
 // fetching expense
 $total_expense_sql = "SELECT sum(amount) as total_expense from add_expense
@@ -50,7 +56,7 @@ if(mysqli_num_rows($expense_result)==1){
     <!-- Header Section -->
     <div class="dashboard-header">
         <div>
-            <h1>Welcome Back, <?php echo $_SESSION['userName'] ?? 'User';?></h1>
+            <h1>Welcome Back, <?php echo $_SESSION['name'] ;?></h1>
             <p class="subtitle">Here's your financial overview for this month</p>
         </div>
         <div class="header-date">

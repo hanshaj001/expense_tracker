@@ -1,10 +1,23 @@
 <?php
 include("../includes/db_conn.php");
 include("../includes/header.php");
+include("../includes/function.php");
 
-    
+session_start();
+$user_id = $_SESSION['user_id'];
+
 if($_SERVER['REQUEST_METHOD']=="POST"){
     
+    $amount = $_POST['amount'];
+    $category_id = $_POST['category'];
+    $income_date = $_POST['income_date'];
+    $notes = $_POST['note'];
+
+    if(mysqli_query($conn,"INSERT into add_income(user_id,category_id,amount,notes)
+    values($user_id,$category_id,$amount,'$notes'); ")){
+        my_alert("green","Income recoded Successfully");
+    }else
+    my_alert("red","Error while recording ");
 }
 
 
@@ -36,16 +49,16 @@ if($_SERVER['REQUEST_METHOD']=="POST"){
             <div class="et-form-group">
                 <label>Category</label>
                 <select name="category" required>
-                            <option value="Salary">Salary</option>
-                            <option value="Business Income">Business Income</option>
-                            <option value="Freelance Work">Freelance Work</option>
-                            <option value="Investment Returns">Investment Returns</option>
-                            <option value="Rental Income">Rental Income</option>
-                            <option value="Bonus">Bonus</option>
-                            <option value="Interest Income">Interest Income</option>
-                            <option value="Gifts Received">Gifts Received</option>
-                            <option value="Dividends">Dividends</option>
-                            <option value="Other Income">Other Income</option>
+                            <option value="1">Salary</option>
+                            <option value="2">Business Income</option>
+                            <option value="3">Freelance Work</option>
+                            <option value="4">Investment Returns</option>
+                            <option value="5">Rental Income</option>
+                            <option value="6">Bonus</option>
+                            <option value="7">Interest Income</option>
+                            <option value="8">Gifts Received</option>
+                            <option value="9">Dividends</option>
+                            <option value="10">Other Income</option>
 
            </select>
             </div>

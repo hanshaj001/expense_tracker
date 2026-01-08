@@ -10,24 +10,24 @@ include("../includes/db_conn.php");
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // collecting data safely and trimming whitespace
-    $user_name = trim($_POST['user_name']);
-    $user_password = trim($_POST['password']);
+    $name = trim($_POST['name']);
+    $password = trim($_POST['password']);
     $email = trim(htmlspecialchars($_POST['email']));
-    $phone = trim(htmlspecialchars($_POST['phone'] ?? ''));
+
 
     // enc password
-    $enc_password = password_hash($user_password,PASSWORD_BCRYPT);
+    $enc_password = password_hash($password,PASSWORD_BCRYPT);
 
     // inserting data into databases
-    $sql = "INSERT into users(user_name,password,email,phone)
-    values ('$user_name','$enc_password','$email',$phone)";
+    $sql = "INSERT into users(name,password,email)
+    values ('$name','$enc_password','$email')";
 
     if(mysqli_query($conn,$sql)){
-       my_alert("success","New Record recorded Successfully " );
-       header("Location: ../index.php")
+       my_alert("success","Registered Successfully " );
+        header("Location: ../index.php")
 ;    }
     else 
-        my_alert("danger","Error while inserting values");
+        my_alert("danger","Error while registering....");
 
     mysqli_close($conn);
 }
@@ -47,7 +47,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <form action="" method="post">
                         <div class="mb-3">
                             <label class="form-label">User Name</label>
-                            <input type="text" name="user_name" placeholder="Enter username" class="form-control" required>
+                            <input type="text" name="name" placeholder="Enter username" class="form-control" required>
                         </div>
 
                         <!-- for email -->
@@ -60,12 +60,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <div class="mb-3">
                             <label class="form-label">Password</label>
                             <input type="password" name="password" placeholder="Enter password" class="form-control" required>
-                        </div>
-
-                        <!-- phone -->
-                     <div class="mb-3">
-                            <label class="form-label">Phone no</label>
-                            <input type="text" name="phone" placeholder="Enter phone No" class="form-control" >
                         </div>
             
 

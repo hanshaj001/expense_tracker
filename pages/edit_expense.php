@@ -10,7 +10,12 @@ include("../includes/header.php");
         $category = $_POST['category'];
         $expense_date = $_POST['expense_date'];
         $note = $_POST['note'];
+
+
+        $result = mysqli_query($conn,"INSERT into add_expense(amount,,)");
     }
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">

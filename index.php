@@ -7,15 +7,15 @@ session_start();
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // collecting data safely and trimming whitespace
-    $user_name = trim($_POST['user_name']);
+    $email = trim($_POST['email']);
     $user_password = trim($_POST['password']);
     
     // SQL query with placeholder
-    $sql = "SELECT * FROM users WHERE user_name = ?";
+    $sql = "SELECT * FROM users WHERE email = ?";
     $stmt = mysqli_prepare($conn, $sql);
 
     // binds the value to the placeholder
-    mysqli_stmt_bind_param($stmt, "s", $user_name);
+    mysqli_stmt_bind_param($stmt, "s", $email);
 
     // Execute the prepared statement
     mysqli_stmt_execute($stmt);
@@ -28,13 +28,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $row = mysqli_fetch_assoc($result);
         $db_user_password = $row['password'];
-        $db_user_name = $row['user_name'];
-
+        $db_user_name = $row['name'];
+        $db_email = $row['email'];
+        $user_id = $row['user_id'];
+ 
         // comparing password
         if (password_verify($user_password, $db_user_password)) {
 
             // creating a variable to store in session
-            $_SESSION['user_name'] = $db_user_name;
+            $_SESSION['name'] = $db_user_name;
+            $_SESSION['user_id'] = $user_id;
             $_SESSION['is_login'] = true;
 
 
@@ -90,7 +93,7 @@ mysqli_close($conn);
                 <div class="form-group">
                     <div class="input-wrapper">
                         <span class="input-icon">👤</span>
-                        <input type="text" id="user_name" name="user_name" placeholder="User Name" required>
+                        <input type="email" id="email" name="email" placeholder="User email" required>
                     </div>
                 </div>
 
