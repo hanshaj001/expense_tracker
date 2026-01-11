@@ -1,11 +1,27 @@
 <?php
+session_start();
 include("../includes/db_conn.php");
 include("../includes/header.php");
 include("../includes/function.php");
 
-session_start();
+
 $user_id = $_SESSION['user_id'];
-    // instalizing the variables
+
+// when click on edit 
+if(isset($_GET['income_id'])){
+        $income_id = $_GET['income_id'];
+
+     $result = (mysqli_query($conn,"SELECT * from add_income where income_id = $income_id"));
+     if($result){
+        if(mysqli_num_rows($result) > 0){
+            $row = mysqli_fetch_assoc($result);
+        }
+     }
+
+}
+
+$user_id = $row['user_id'];
+   // instalizing the variables
     $amount = '';
     $category_id = '';
     $income_date='';
@@ -37,18 +53,18 @@ if($_SERVER['REQUEST_METHOD']=="POST"){
 
     if(empty($errors)){
     
-    if(mysqli_query($conn,"INSERT into add_income(user_id,category_id,amount,notes)
-    values($user_id,$category_id,$amount,'$notes'); ")){
-        $success = "Income recoded Successfully";
-        $amount = '';
-        $category_id = '';
-        $income_date = '';
-        $notes = '';
+    if(mysqli_query($conn,"UPDATE add_income 
+    set category_id = $category_id,
+     amount = $amount ,
+      updated_at = '$income_date',
+       notes = '$notes' 
+       where income_id = $income_id
+       and user_id = $user_id;")){
+        $success = "Income Updated Successfully";
     }else
     echo "Error while recording ";
     }
 }
-
 
 ?>
 <!DOCTYPE html>
@@ -56,7 +72,7 @@ if($_SERVER['REQUEST_METHOD']=="POST"){
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Income </title>
+    <title>Update Income </title>
     <link rel="stylesheet" href="/EXPANSE_TRACKER/assets/income_expense.css">
 
 </head>
@@ -65,14 +81,14 @@ if($_SERVER['REQUEST_METHOD']=="POST"){
 <div class="et-main-content">
 
     <div class="et-form-card">
-        <h4 class="et-form-title">Add Income</h4>
+        <h4 class="et-form-title">Update Income</h4>
 
         <form method="POST" action="" class="et-form">
 
         
             <div class="et-form-group">
                 <label>Amount</label>
-                <input type="number" name="amount" value="<?php echo $amount ?? '' ;?>" placeholder="Enter amount" required>
+                <input type="number" name="amount" value="<?php echo $row['amount'] ;?>" placeholder="Enter amount" required>
                 <span style="color: red;"><?php echo $errors['amount'] ?? ''; ?></span>
             </div>
 
@@ -80,30 +96,30 @@ if($_SERVER['REQUEST_METHOD']=="POST"){
                 <label>Category</label>
                 <select name="category" required>
                             <option value="">-- Select Income type --</option>
-                            <option value="1" <?php if($category_id == 1) echo 'selected';?>>Salary</option>
-                            <option value="2" <?php if($category_id == 2) echo 'selected';?>>Business Income</option>
-                            <option value="3"<?php if($category_id == 3) echo 'selected';?>>Freelance Work</option>
-                            <option value="4"<?php if($category_id == 4) echo 'selected';?>>Investment Returns</option>
-                            <option value="5"<?php if($category_id == 5) echo 'selected';?>>Rental Income</option>
-                            <option value="6"<?php if($category_id == 6) echo 'selected';?>>Bonus</option>
-                            <option value="7"<?php if($category_id == 7) echo 'selected';?>>Interest Income</option>
-                            <option value="8"<?php if($category_id == 8) echo 'selected';?>>Gifts Received</option>
-                            <option value="9"<?php if($category_id == 9) echo 'selected';?>>Dividends</option>
-                            <option value="10"<?php if($category_id == 10) echo 'selected';?>>Other Income</option>
+                            <option value="1" <?php if($row['category_id'] == 1) echo 'selected';?>>Salary</option>
+                            <option value="2" <?php if($row['category_id']== 2) echo 'selected';?>>Business Income</option>
+                            <option value="3"<?php if($row['category_id']== 3) echo 'selected';?>>Freelance Work</option>
+                            <option value="4"<?php if($row['category_id'] == 4) echo 'selected';?>>Investment Returns</option>
+                            <option value="5"<?php if($row['category_id'] == 5) echo 'selected';?>>Rental Income</option>
+                            <option value="6"<?php if($row['category_id'] == 6) echo 'selected';?>>Bonus</option>
+                            <option value="7"<?php if($row['category_id'] == 7) echo 'selected';?>>Interest Income</option>
+                            <option value="8"<?php if($row['category_id'] == 8) echo 'selected';?>>Gifts Received</option>
+                            <option value="9"<?php if($row['category_id']== 9) echo 'selected';?>>Dividends</option>
+                            <option value="10"<?php if($row['category_id'] == 10) echo 'selected';?>>Other Income</option>
 
            </select>
             </div>
 
             <div class="et-form-group">
                 <label>Date</label>
-                <input type="date" name="income_date" required value="<?php echo $income_date;?>">
+                <input type="date" name="income_date" required value="<?php echo $row['created_at'];?>">
                 <span style="color: red;"><?php echo $errors['income_date'] ?? ''; ?></span>
                 <span style="color: red;"><?php echo $errors['date_excessed'] ?? ''; ?></span>
             </div>
 
             <div class="et-form-group">
                 <label>Note (Optional)</label>
-                <textarea name="note" rows="3"><?php echo $notes;?></textarea>
+                <textarea name="note" rows="3"><?php echo $row['notes'];?></textarea>
             </div>
 
             <button type="submit" class="et-btn-primary">
@@ -114,7 +130,6 @@ if($_SERVER['REQUEST_METHOD']=="POST"){
     </div>
 
 </div>
-
 <?php include '../includes/footer.php'; ?> 
 
 </body>

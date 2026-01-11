@@ -81,13 +81,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     <div class="et-section-title">Others</div>
 
     <ul class="nav flex-column et-menu">
-        <li class="nav-item">
-            <a class="nav-link <?= ($currentPage=='profile.php')?'active':'' ?>" href="profile.php">
-                <i class="bi bi-person"></i>
-                Profile
-            </a>
-        </li>
-
+    
         <li class="nav-item">
             <a class="nav-link logout" href="logout.php">
                 <i class="bi bi-box-arrow-right"></i>
