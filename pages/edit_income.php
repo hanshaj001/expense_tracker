@@ -5,13 +5,20 @@ include("../includes/header.php");
 include("../includes/function.php");
 
 
+// check if the user is logged in or not
+if(!isset($_SESSION['name'])){
+    header("Location: ../index.php");
+}
+
+
+// getting user id
 $user_id = $_SESSION['user_id'];
 
 // when click on edit 
-if(isset($_GET['income_id'])){
-        $income_id = $_GET['income_id'];
+if(isset($_GET['id'])){
+        $transaction_id = $_GET['id'];
 
-     $result = (mysqli_query($conn,"SELECT * from add_income where income_id = $income_id"));
+     $result = (mysqli_query($conn,"SELECT * from transactions where id = $transaction_id"));
      if($result){
         if(mysqli_num_rows($result) > 0){
             $row = mysqli_fetch_assoc($result);
@@ -20,7 +27,9 @@ if(isset($_GET['income_id'])){
 
 }
 
+// fetching user_id from the transaction row
 $user_id = $row['user_id'];
+
    // instalizing the variables
     $amount = '';
     $category_id = '';
@@ -28,6 +37,8 @@ $user_id = $row['user_id'];
     $notes = '';
     $errors= [];
     $success = '';
+
+    // when user click on update
 if($_SERVER['REQUEST_METHOD']=="POST"){
     
     $amount = $_POST['amount'];
@@ -53,12 +64,12 @@ if($_SERVER['REQUEST_METHOD']=="POST"){
 
     if(empty($errors)){
     
-    if(mysqli_query($conn,"UPDATE add_income 
+    if(mysqli_query($conn,"UPDATE transactions 
     set category_id = $category_id,
      amount = $amount ,
       updated_at = '$income_date',
        notes = '$notes' 
-       where income_id = $income_id
+       where id = $transaction_id
        and user_id = $user_id;")){
         $success = "Income Updated Successfully";
     }else
@@ -123,7 +134,7 @@ if($_SERVER['REQUEST_METHOD']=="POST"){
             </div>
 
             <button type="submit" class="et-btn-primary">
-                <i class="bi bi-plus-circle"></i> Save Income
+                <i class="bi bi-plus-circle"></i> Update Income
             </button>
         <span class="et-form-group text-success"><p><?php echo $success ;?></p></span>
         </form>

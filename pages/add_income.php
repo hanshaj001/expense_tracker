@@ -1,9 +1,17 @@
 <?php
+
+session_start();
 include("../includes/db_conn.php");
 include("../includes/header.php");
 include("../includes/function.php");
 
-session_start();
+
+// check if the user is logged in or not
+
+if(!isset($_SESSION['name'])){
+    header("Location: ../index.php");
+}
+
 $user_id = $_SESSION['user_id'];
     // instalizing the variables
     $amount = '';
@@ -37,8 +45,8 @@ if($_SERVER['REQUEST_METHOD']=="POST"){
 
     if(empty($errors)){
     
-    if(mysqli_query($conn,"INSERT into add_income(user_id,category_id,amount,notes)
-    values($user_id,$category_id,$amount,'$notes'); ")){
+    if(mysqli_query($conn,"INSERT into transactions(user_id,category_id,type,amount,notes,created_at)
+    values($user_id,$category_id,'income',$amount,'$notes','$income_date');")){
         $success = "Income recoded Successfully";
         $amount = '';
         $category_id = '';
@@ -60,7 +68,6 @@ if($_SERVER['REQUEST_METHOD']=="POST"){
     <link rel="stylesheet" href="/EXPANSE_TRACKER/assets/income_expense.css">
 
 </head>
-<body>
 
 <div class="et-main-content">
 
@@ -92,6 +99,7 @@ if($_SERVER['REQUEST_METHOD']=="POST"){
                             <option value="10"<?php if($category_id == 10) echo 'selected';?>>Other Income</option>
 
            </select>
+                <span style="color: red;"><?php echo $errors['category'] ?? ''; ?></span>
             </div>
 
             <div class="et-form-group">

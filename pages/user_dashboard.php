@@ -4,19 +4,28 @@ include("../includes/db_conn.php");
 include("../includes/header.php");
 
 
+// check if user is loggin in or not
+if(!isset($_SESSION['name'])){
+    header("Location: ../index.php");
+}
+
+//getting user_id form sesion 
 $user_id = $_SESSION['user_id'];
 
 // total income fetiching
-$total_income_sql = "SELECT SUM(amount) AS total_income
-FROM add_income
+$total_income_sql = " SELECT SUM(amount) AS total_income
+FROM transactions
 WHERE user_id = $user_id
-AND MONTH(created_at) = MONTH(CURDATE())
-AND YEAR(created_at) = YEAR(CURDATE())";
+  AND type = 'income'
+  AND YEARWEEK(created_at, 1) = YEARWEEK(CURDATE(), 1)
+";
+
 
 // fetching expense
-$total_expense_sql = "SELECT sum(amount) as total_expense from add_expense
-where month(created_at) = month(current_date())
-and year(created_at) = year(current_date())";
+$total_expense_sql = "SELECT sum(amount) as total_expense from transactions
+where user_id = $user_id
+and type = 'expense'
+and yearweek(created_at,1) = yearweek(current_date(),1)";
 
 // query running
 $income_result = mysqli_query($conn,$total_income_sql);
@@ -31,6 +40,25 @@ if(mysqli_num_rows($expense_result)==1){
     $ex_row = mysqli_fetch_assoc($expense_result);
 }
 
+
+// to count rent expensses
+    $category_amt_fetch = mysqli_query($conn,"SELECT sum(amount) as total_rent from 
+    transactions where category_id = 12 
+    and user_id = $user_id 
+    and type = 'expense';");
+    
+    $category_amt_fetch_row = mysqli_fetch_assoc($category_amt_fetch);
+    $total_rent = $category_amt_fetch_row['total_rent'];
+
+    
+
+    //    if(mysqli_num_rows($category_amt_fetch)>0){
+    //         while($category_amt_fetch_row = mysqli_fetch_assoc($category_amt_fetch)){
+    //             echo "<pre>";
+    //             print_r($category_amt_fetch_row);
+    //             echo "</pre>";
+    //         }
+    //    }
 
 ?>
 
@@ -105,8 +133,8 @@ if(mysqli_num_rows($expense_result)==1){
             <div class="chart-header">
                 <h3>Income vs Expense Trend</h3>
                 <div class="chart-controls">
-                    <button class="chart-btn active">6M</button>
-                    <button class="chart-btn">1Y</button>
+                    <button class="chart-btn active">7D</button>
+                    <button class="chart-btn">1M</button>
                     <button class="chart-btn">All</button>
                 </div>
             </div>
@@ -169,5 +197,4 @@ if(mysqli_num_rows($expense_result)==1){
 
 <?php
 include("../includes/footer.php");
-
 ?>

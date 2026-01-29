@@ -3,6 +3,8 @@ include("./includes/function.php");
 include("./includes/db_conn.php");
 
 session_start();
+
+$errors = [];
 /// taking inputs 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
@@ -30,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $db_user_password = $row['password'];
         $db_user_name = $row['name'];
         $db_email = $row['email'];
-        $user_id = $row['user_id'];
+        $user_id = $row['id'];
  
         // comparing password
         if (password_verify($user_password, $db_user_password)) {
@@ -41,15 +43,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['is_login'] = true;
 
 
-            my_alert("success", "Login Successfully");
+           $errors['success'] = "Login Successfull";
             header("Location: ./pages/user_dashboard.php");
             exit();
         } else {
-            my_alert("danger", "Invalid username or password");
+                 $errors['invalid'] ="Invalid username or password";
         }
 
     } else {
-        my_alert("danger", "Username not found");
+         $errors['not_found'] = "Username not found";
     }
 
     // proper close inside POST block
@@ -113,11 +115,13 @@ mysqli_close($conn);
                     <a href="#" class="forgot-password">Forgot Password?</a>
                 </div> -->
 
-                <button type="submit" class="btn-signin">Sing in</button>
+                <button type="submit" class="btn-signin">Log in</button>
+                <span style="text-align: center; color: red; font-weight: bold;"><?php echo $errors['invalid'] ?? ''; ?></span>
+                <span style="text-align: center; color: red; font-weight: bold;"><?php echo $errors['not_found'] ?? ''; ?></span>
             </form>
             <!-- BACKEND FORM END -->
 
-            <div class="divider">OR</div>
+            <div style="text-align: center;">OR</div>
 
             <div class="signup-link">
                 Don't have an account? <a href="./pages/register_user.php">Sign Up</a>
@@ -138,7 +142,6 @@ mysqli_close($conn);
                 btn.textContent = 'SHOW';
             }
         }
-        // BACKEND JAVASCRIPT END
     </script>
 </body>
 </html>
