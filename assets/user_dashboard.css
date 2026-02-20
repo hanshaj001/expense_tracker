@@ -257,80 +257,9 @@ body {
     color: var(--primary-dark);
 }
 
-/* ========== RECENT TRANSACTIONS ========== */
-.transaction-list {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
 
-.transaction-item {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 16px;
-    background: var(--gray-50);
-    border-radius: 12px;
-    transition: all 0.3s;
-}
 
-.transaction-item:hover {
-    background: var(--gray-100);
-    transform: translateX(4px);
-}
 
-.transaction-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    flex-shrink: 0;
-}
-
-.transaction-info {
-    flex: 1;
-}
-
-.transaction-title {
-    font-weight: 600;
-    color: var(--dark);
-    margin-bottom: 4px;
-}
-
-.transaction-date {
-    font-size: 13px;
-    color: var(--gray-600);
-}
-
-.transaction-amount {
-    font-weight: 700;
-    font-size: 16px;
-}
-
-.transaction-amount.income {
-    color: var(--success);
-}
-
-.transaction-amount.expense {
-    color: var(--danger);
-}
-
-/* ========== BOTTOM CHARTS ========== */
-.bottom-charts {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-    gap: 24px;
-}
-
-.chart-card {
-    background: var(--white);
-    border-radius: 20px;
-    padding: 28px;
-    box-shadow: var(--shadow);
-}
 
 /* ========== RESPONSIVE ========== */
 @media (max-width: 1400px) {
