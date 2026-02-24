@@ -1,4 +1,5 @@
 <?php
+
 include("../includes/db_conn.php");
 include("../includes/footer.php");
 include("../includes/header.php");
@@ -21,10 +22,10 @@ include("../includes/header.php");
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Expense</title>
-    <link rel="stylesheet" href="../assets/income_expense.css"> <!-- Link your CSS file -->
+    <link rel="stylesheet" href="../assets/income_expense.css"> 
 </head>
 <body>
-<div class="et-main-content">
+<div class="et-main-content" style="margin-left: 300px; padding-top: 20px;">
 
     <div class="et-form-card">
         <h4 class="et-form-title">Add Expense</h4>

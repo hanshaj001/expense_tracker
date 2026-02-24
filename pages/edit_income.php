@@ -89,7 +89,7 @@ if($_SERVER['REQUEST_METHOD']=="POST"){
 </head>
 <body>
 
-<div class="et-main-content">
+<div class="et-main-content" style="margin-left: 300px; padding-top: 20px;" >
 
     <div class="et-form-card">
         <h4 class="et-form-title">Update Income</h4>

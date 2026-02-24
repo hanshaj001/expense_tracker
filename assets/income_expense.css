@@ -1,13 +1,15 @@
 
 
-/* Card wrapper */
+
 .et-form-card {
     background: #ffffff;
+    width: 100%;             
     max-width: 650px;
     padding: 30px;
     border-radius: 14px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.08);
 }
+
 
 /* Form title */
 .et-form-title {
@@ -69,8 +71,12 @@
 /* Responsive */
 @media (max-width: 768px) {
     .et-form-card {
-        padding: 20px;
+     padding: 20px;
     }
+    .et-main-content{
+        display: block;
+    margin-left: 0;
+}
 }
 
 

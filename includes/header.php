@@ -24,70 +24,128 @@
     >
 
     <!-- Custom CSS -->
-   <link rel="stylesheet" href="/EXPANSE_TRACKER/assets/styles.css">
+    <link rel="stylesheet" href="../assets/styles.css">
+</head>
 
 <body>
- <?php
+
+<?php
 $currentPage = basename($_SERVER['PHP_SELF']);
 ?>
 
-<div class="et-sidebar">
+<!-- 
+     MOBILE TOP BAR
+    -->
+<div class="topbar">
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+    <div class="topbar-brand">Expense Tracker</div>
+</div>
 
-    <div class="et-app-header">
-        <span class="et-logo">Expense Tracker</span>
+<!-- Overlay  -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+
+<!-- sidebar -->
+<div class="sidebar" id="sidebar">
+
+    <div class="app-header">
+        <span class="logo">Expense Tracker</span>
+        <button class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Close menu">
+            <i class="bi bi-x-lg"></i>
+        </button>
     </div>
 
-    <div class="et-section-title">Business</div>
+    <div class="section-title">Business</div>
 
-    <ul class="nav flex-column et-menu">
+    <ul class="nav flex-column menu">
 
         <li class="nav-item">
-            <a class="nav-link <?= ($currentPage=='user_dashboard.php')?'active':'' ?>" href="user_dashboard.php">
+            <a class="nav-link <?= ($currentPage == 'user_dashboard.php') ? 'active' : '' ?>" href="user_dashboard.php">
                 <i class="bi bi-grid"></i>
                 Dashboard
             </a>
         </li>
 
         <li class="nav-item">
-            <a class="nav-link <?= ($currentPage=='add_income.php')?'active':'' ?>" href="add_income.php">
+            <a class="nav-link <?= ($currentPage == 'add_income.php') ? 'active' : '' ?>" href="add_income.php">
                 <i class="bi bi-cash"></i>
                 Income
             </a>
         </li>
 
         <li class="nav-item">
-            <a class="nav-link <?= ($currentPage=='add_expense.php')?'active':'' ?>" href="add_expense.php">
+            <a class="nav-link <?= ($currentPage == 'add_expense.php') ? 'active' : '' ?>" href="add_expense.php">
                 <i class="bi bi-credit-card"></i>
                 Expense
             </a>
         </li>
 
         <li class="nav-item">
-            <a class="nav-link <?= ($currentPage=='categories.php')?'active':'' ?>" href="categories.php">
+            <a class="nav-link <?= ($currentPage == 'categories.php') ? 'active' : '' ?>" href="categories.php">
                 <i class="bi bi-bar-chart"></i>
                 Categories
             </a>
         </li>
 
         <li class="nav-item">
-            <a class="nav-link <?= ($currentPage=='transaction.php')?'active':'' ?>" href="transaction.php">
-                <i class="bi bi-bar-chart"></i>
-               Transactions
+            <a class="nav-link <?= ($currentPage == 'transaction.php') ? 'active' : '' ?>" href="transaction.php">
+                <i class="bi bi-arrow-left-right"></i>
+                Transactions
             </a>
         </li>
 
     </ul>
 
-    <div class="et-section-title">Others</div>
+    <div class="section-title">Others</div>
 
-    <ul class="nav flex-column et-menu">
-    
+    <ul class="nav flex-column menu">
+
         <li class="nav-item">
             <a class="nav-link logout" href="logout.php">
                 <i class="bi bi-box-arrow-right"></i>
                 Logout
             </a>
         </li>
+
     </ul>
 
 </div>
+
+<!-- ==============================
+     SIDEBAR TOGGLE SCRIPT
+     ============================== -->
+<script>
+    (function () {
+        var sidebar        = document.getElementById('sidebar');
+        var overlay        = document.getElementById('sidebarOverlay');
+        var hamburgerBtn   = document.getElementById('hamburgerBtn');
+        var closeBtn       = document.getElementById('sidebarCloseBtn');
+
+        function openSidebar() {
+            sidebar.classList.add('open');
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        if (hamburgerBtn) hamburgerBtn.addEventListener('click', openSidebar);
+        if (closeBtn)     closeBtn.addEventListener('click', closeSidebar);
+        if (overlay)      overlay.addEventListener('click', closeSidebar);
+
+        // Close sidebar when a nav link is clicked on mobile
+        document.querySelectorAll('.menu .nav-link').forEach(function (link) {
+            link.addEventListener('click', function () {
+                if (window.innerWidth <= 768) closeSidebar();
+            });
+        });
+    })();
+</script>

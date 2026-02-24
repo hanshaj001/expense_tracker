@@ -7,37 +7,35 @@
 }
 
 :root {
-    --primary: #3b82f6;
-    --primary-dark: #2563eb;
-    --success: #10b981;
+    --primary:       #3b82f6;
+    --primary-dark:  #2563eb;
+    --success:       #10b981;
     --success-light: #d1fae5;
-    --danger: #ef4444;
-    --danger-light: #fee2e2;
-    --warning: #f59e0b;
-    --info: #06b6d4;
-    --dark: #111827;
-    --gray-50: #f9fafb;
-    --gray-100: #f3f4f6;
-    --gray-200: #e5e7eb;
-    --gray-300: #d1d5db;
-    --gray-600: #4b5563;
-    --gray-700: #374151;
-    --white: #ffffff;
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    --danger:        #ef4444;
+    --danger-light:  #fee2e2;
+    --warning:       #f59e0b;
+    --info:          #06b6d4;
+    --dark:          #111827;
+    --gray-50:       #f9fafb;
+    --gray-100:      #f3f4f6;
+    --gray-200:      #e5e7eb;
+    --gray-300:      #d1d5db;
+    --gray-600:      #4b5563;
+    --gray-700:      #374151;
+    --white:         #ffffff;
+    --shadow-sm:     0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow:        0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg:     0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --shadow-xl:     0 20px 25px -5px rgba(0, 0, 0, 0.1);
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
     background: var(--gray-50);
     color: var(--dark);
     display: flex;
     min-height: 100vh;
 }
-
-
 
 /* ========== MAIN CONTENT ========== */
 .main-content {
@@ -45,6 +43,7 @@ body {
     flex: 1;
     padding: 40px;
     max-width: 1600px;
+    width: 100%;
 }
 
 /* ========== DASHBOARD HEADER ========== */
@@ -53,35 +52,38 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 40px;
+    flex-wrap: wrap;
+    gap: 16px;
 }
 
 .dashboard-header h1 {
-    font-size: 32px;
+    font-size: 28px;
     color: var(--dark);
     font-weight: 700;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .subtitle {
     color: var(--gray-600);
-    font-size: 16px;
+    font-size: 15px;
 }
 
 .header-date {
     background: var(--white);
-    padding: 12px 24px;
+    padding: 10px 20px;
     border-radius: 12px;
     box-shadow: var(--shadow-sm);
     font-weight: 600;
     color: var(--gray-700);
+    white-space: nowrap;
 }
 
 /* ========== SUMMARY CARDS GRID ========== */
 .summary-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 24px;
-    margin-bottom: 40px;
+    margin-bottom: 32px;
 }
 
 .summary-card {
@@ -110,7 +112,7 @@ body {
 }
 
 .summary-card:hover {
-    transform: translateY(-8px);
+    transform: translateY(-6px);
     box-shadow: var(--shadow-xl);
 }
 
@@ -120,8 +122,8 @@ body {
 
 /* Card Icons */
 .card-icon {
-    width: 64px;
-    height: 64px;
+    width: 60px;
+    height: 60px;
     border-radius: 16px;
     display: flex;
     align-items: center;
@@ -141,14 +143,14 @@ body {
     box-shadow: 0 8px 16px rgba(239, 68, 68, 0.3);
 }
 
-
 .card-content {
     flex: 1;
+    min-width: 0;
 }
 
 .card-label {
     color: var(--gray-600);
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -156,82 +158,81 @@ body {
 }
 
 .card-amount {
-    font-size: 36px;
+    font-size: 30px;
     font-weight: 700;
     color: var(--dark);
-    margin-bottom: 8px;
+    margin-bottom: 6px;
+    word-break: break-word;
 }
 
 .card-change {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     display: flex;
     align-items: center;
     gap: 4px;
 }
 
-.card-change.positive {
-    color: var(--success);
-}
+.card-change.positive { color: var(--success); }
+.card-change.negative { color: var(--danger); }
+.card-change .arrow   { font-size: 15px; }
 
-.card-change.negative {
-    color: var(--danger);
-}
-
-.card-change .arrow {
-    font-size: 16px;
-}
-
-/* ========== CHARTS CONTAINER ========== */
-.charts-container {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 24px;
-    margin-bottom: 24px;
-}
-
-.chart-large,
-.chart-medium,
-.recent-transactions {
+/* ========== TREND CHART (FULL WIDTH) ========== */
+.chart-fullwidth {
     background: var(--white);
     border-radius: 20px;
     padding: 28px;
     box-shadow: var(--shadow);
+    margin-bottom: 28px;
 }
 
-.chart-column {
-    display: flex;
-    flex-direction: column;
+/* ========== THREE DONUT CHARTS ========== */
+.triple-charts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 24px;
 }
 
+.triple-chart-card {
+    background: var(--white);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+}
+
+/* ========== CHART SHARED STYLES ========== */
 .chart-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .chart-header h3 {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
     color: var(--dark);
+    margin: 0;
 }
 
 .chart-controls {
     display: flex;
-    gap: 8px;
+    gap: 6px;
+    flex-wrap: wrap;
 }
 
 .chart-btn {
-    padding: 8px 16px;
+    padding: 6px 14px;
     border: 2px solid var(--gray-200);
     background: var(--white);
     border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: all 0.2s;
     color: var(--gray-600);
+    font-size: 13px;
 }
 
 .chart-btn:hover {
@@ -249,58 +250,159 @@ body {
     color: var(--primary);
     text-decoration: none;
     font-weight: 600;
+    font-size: 13px;
+    transition: color 0.2s;
+}
+
+.view-all:hover { color: var(--primary-dark); }
+
+/* ========== BADGES ========== */
+.chart-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.badge-neutral { background: #f3f4f6; color: #6b7280; }
+.badge-expense { background: #fee2e2; color: #dc2626; }
+.badge-income  { background: #d1fae5; color: #059669; }
+
+/* ========== CHART STATS ROW (under doughnuts) ========== */
+.chart-stats-row {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--gray-100);
+}
+
+.chart-stat-item  { text-align: center; }
+
+.chart-stat-label {
+    font-size: 11px;
+    color: var(--gray-600);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 4px;
+}
+
+.chart-stat-value {
     font-size: 14px;
-    transition: color 0.3s;
+    font-weight: 700;
+    color: var(--dark);
+    word-break: break-all;
 }
 
-.view-all:hover {
-    color: var(--primary-dark);
-}
-
-
-
-
+.income-val  { color: #10b981; }
+.expense-val { color: #ef4444; }
 
 /* ========== RESPONSIVE ========== */
+
+/* Large tablets */
 @media (max-width: 1400px) {
-    .charts-container {
-        grid-template-columns: 1fr;
+    .triple-charts {
+        grid-template-columns: 1fr 1fr;
     }
 }
 
+/* Tablets */
 @media (max-width: 1024px) {
+    .main-content {
+        margin-left: 220px;
+        padding: 30px 24px;
+    }
+
     .summary-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-    
-    .bottom-charts {
-        grid-template-columns: 1fr;
+
+    .dashboard-header h1 {
+        font-size: 24px;
     }
 }
 
+/* Mobile */
 @media (max-width: 768px) {
-    .sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
-    }
-    
     .main-content {
         margin-left: 0;
-        padding: 20px;
+        padding: 76px 16px 24px; /* 76px accounts for fixed topbar */
     }
-    
+
     .summary-grid {
         grid-template-columns: 1fr;
-    }
-    
-    .dashboard-header {
-        flex-direction: column;
-        align-items: flex-start;
         gap: 16px;
     }
-    
+
+    .triple-charts {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .chart-fullwidth {
+        padding: 20px 16px;
+    }
+
+    .triple-chart-card {
+        padding: 20px 16px;
+    }
+
+    .dashboard-header {
+        margin-bottom: 24px;
+    }
+
+    .dashboard-header h1 {
+        font-size: 22px;
+    }
+
     .card-amount {
-        font-size: 28px;
+        font-size: 24px;
+    }
+
+    .card-icon {
+        width: 50px;
+        height: 50px;
+    }
+
+    .summary-card {
+        padding: 20px;
+    }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+    .main-content {
+        padding: 72px 12px 20px;
+    }
+
+    .chart-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .chart-controls {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .chart-btn {
+        padding: 5px 10px;
+        font-size: 12px;
+    }
+
+    .chart-header h3 {
+        font-size: 15px;
+    }
+
+    .card-amount {
+        font-size: 20px;
+    }
+
+    .header-date {
+        font-size: 13px;
+        padding: 8px 14px;
     }
 }

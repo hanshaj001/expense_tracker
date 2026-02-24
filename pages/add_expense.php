@@ -89,8 +89,8 @@ include("../includes/header.php");
     <link rel="stylesheet" href="../assets/income_expense.css"> <!-- Link your CSS file -->
 </head>
 <body>
-<div class="et-main-content">
-
+<div class="et-main-content" style="margin-left: 300px; padding-top: 20px;">
+<div class="form-wrapper">
     <div class="et-form-card">
         <h4 class="et-form-title">Add Expense</h4>
 
@@ -136,6 +136,7 @@ include("../includes/header.php");
                 <span class="et-form-group text-success"><p><?php echo $success ?? '';?></p></span>
 
         </form>
+    </div>
     </div>
 
 </div>
