@@ -1,9 +1,7 @@
 /* ========== CATEGORIES PAGE CSS ========== */
 
 .categories-container {
-    padding: 30px;
-    background-color: #f5f6fa;
-    min-height: 100vh;
+    /* Layout handled by .main-content in styles.css */
 }
 
 /* ========== PAGE HEADER ========== */
@@ -198,7 +196,7 @@
 /* Tablet: 768px – 1024px */
 @media (max-width: 1024px) {
     .categories-container {
-        padding: 24px 20px;
+        /* Mobile padding handled by .main-content */
     }
 
     .expense-cards {
@@ -215,8 +213,7 @@
 /* Mobile: ≤ 768px */
 @media (max-width: 768px) {
     .categories-container {
-        margin-left: 0;
-        padding: 80px 16px 24px; /* top padding for fixed topbar */
+        /* Handled by .main-content */
     }
 
     .page-header h2 {
@@ -291,8 +288,7 @@
 /* Small phones */
 @media (max-width: 480px) {
     .categories-container {
-        margin-left: 0;
-        padding: 74px 12px 20px;
+        /* Handled by .main-content */
     }
 
     .expense-cards {

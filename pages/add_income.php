@@ -65,59 +65,73 @@ if($_SERVER['REQUEST_METHOD']=="POST"){
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Income </title>
-    <link rel="stylesheet" href="/EXPANSE_TRACKER/assets/income_expense.css">
+    <link rel="stylesheet" href="../assets/income_expense.css">
+    <link rel="stylesheet" href="../assets/global.css">
 
 </head>
 
-<div class="et-main-content" style="margin-left: 300px; padding-top: 20px;">
+<div class="main-content animate-fade-in">
 
-    <div class="et-form-card">
-        <h4 class="et-form-title">Add Income</h4>
+    <div class="glass-card">
+        <h4 class="page-title">Add Income</h4>
 
         <form method="POST" action="" class="et-form">
 
         
-            <div class="et-form-group">
+            <div class="form-group">
                 <label>Amount</label>
-                <input type="number" name="amount" value="<?php echo $amount ?? '' ;?>" placeholder="Enter amount" required>
-                <span style="color: red;"><?php echo $errors['amount'] ?? ''; ?></span>
+                <div class="input-wrapper">
+                    <span class="input-icon"><i class="fas fa-rupee-sign"></i></span>
+                    <input type="number" name="amount" class="form-control" value="<?php echo $amount ?? '' ;?>" placeholder="Enter amount" min="0.01" step="0.01" required>
+                </div>
+                <span class="error-msg"><?php echo $errors['amount'] ?? ''; ?></span>
             </div>
 
-            <div class="et-form-group">
+            <div class="form-group">
                 <label>Category</label>
-                <select name="category" required>
-                            <option value="">-- Select Income type --</option>
-                            <option value="1" <?php if($category_id == 1) echo 'selected';?>>Salary</option>
-                            <option value="2" <?php if($category_id == 2) echo 'selected';?>>Business Income</option>
-                            <option value="3"<?php if($category_id == 3) echo 'selected';?>>Freelance Work</option>
-                            <option value="4"<?php if($category_id == 4) echo 'selected';?>>Investment Returns</option>
-                            <option value="5"<?php if($category_id == 5) echo 'selected';?>>Rental Income</option>
-                            <option value="6"<?php if($category_id == 6) echo 'selected';?>>Bonus</option>
-                            <option value="7"<?php if($category_id == 7) echo 'selected';?>>Interest Income</option>
-                            <option value="8"<?php if($category_id == 8) echo 'selected';?>>Gifts Received</option>
-                            <option value="9"<?php if($category_id == 9) echo 'selected';?>>Dividends</option>
-                            <option value="10"<?php if($category_id == 10) echo 'selected';?>>Other Income</option>
-
-           </select>
-                <span style="color: red;"><?php echo $errors['category'] ?? ''; ?></span>
+                <div class="input-wrapper">
+                    <span class="input-icon"><i class="fas fa-folder"></i></span>
+                    <select name="category" class="form-control" required>
+                        <option value="">-- Select Income type --</option>
+                        <option value="1" <?php if($category_id == 1) echo 'selected';?>>Salary</option>
+                        <option value="2" <?php if($category_id == 2) echo 'selected';?>>Business Income</option>
+                        <option value="3"<?php if($category_id == 3) echo 'selected';?>>Freelance Work</option>
+                        <option value="4"<?php if($category_id == 4) echo 'selected';?>>Investment Returns</option>
+                        <option value="5"<?php if($category_id == 5) echo 'selected';?>>Rental Income</option>
+                        <option value="6"<?php if($category_id == 6) echo 'selected';?>>Bonus</option>
+                        <option value="7"<?php if($category_id == 7) echo 'selected';?>>Interest Income</option>
+                        <option value="8"<?php if($category_id == 8) echo 'selected';?>>Gifts Received</option>
+                        <option value="9"<?php if($category_id == 9) echo 'selected';?>>Dividends</option>
+                        <option value="10"<?php if($category_id == 10) echo 'selected';?>>Other Income</option>
+                    </select>
+                </div>
+                <span class="error-msg"><?php echo $errors['category'] ?? ''; ?></span>
             </div>
 
-            <div class="et-form-group">
+            <div class="form-group">
                 <label>Date</label>
-                <input type="date" name="income_date" required value="<?php echo $income_date;?>">
-                <span style="color: red;"><?php echo $errors['income_date'] ?? ''; ?></span>
-                <span style="color: red;"><?php echo $errors['date_excessed'] ?? ''; ?></span>
+                <div class="input-wrapper">
+                    <span class="input-icon"><i class="fas fa-calendar-alt"></i></span>
+                    <input type="date" name="income_date" class="form-control" required value="<?php echo $income_date;?>" max="<?php echo date('Y-m-d'); ?>">
+                </div>
+                <span class="error-msg"><?php echo $errors['income_date'] ?? ''; ?></span>
+                <span class="error-msg"><?php echo $errors['date_excessed'] ?? ''; ?></span>
             </div>
 
-            <div class="et-form-group">
+            <div class="form-group">
                 <label>Note (Optional)</label>
-                <textarea name="note" rows="3"><?php echo $notes;?></textarea>
+                <div class="input-wrapper">
+                    <span class="input-icon"><i class="fas fa-sticky-note"></i></span>
+                    <textarea name="note" class="form-control" rows="3"><?php echo $notes;?></textarea>
+                </div>
             </div>
 
-            <button type="submit" class="et-btn-primary">
+            <button type="submit" class="btn-gradient">
                 <i class="bi bi-plus-circle"></i> Save Income
             </button>
-        <span class="et-form-group text-success"><p><?php echo $success ;?></p></span>
+            <?php if(!empty($success)): ?>
+                <span class="success-msg"><?php echo $success; ?></span>
+            <?php endif; ?>
         </form>
     </div>
 

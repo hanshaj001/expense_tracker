@@ -70,13 +70,9 @@ $total_income_sum = array_sum(array_column($income_cat_data, 'total'));
     <title>Expense Tracker</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="../assets/user_dashboard.css">
+    <link rel="stylesheet" href="../assets/global.css">
     <style>
         * { box-sizing: border-box; }
-
-        .main-content {
-            margin-left: 260px;
-            padding: 40px;
-        }
 
         /* Summary cards */
         .summary-grid {
@@ -86,12 +82,42 @@ $total_income_sum = array_sum(array_column($income_cat_data, 'total'));
             margin-bottom: 32px;
         }
 
+        .summary-card {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+        }
+
+        .income-icon { background: linear-gradient(135deg, #10b981, #059669); }
+        .expense-icon { background: linear-gradient(135deg, #ef4444, #dc2626); }
+
+        .card-label {
+            font-size: 14px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .card-amount {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0;
+        }
+
         /* Trend chart full width */
         .chart-fullwidth {
-            background: var(--white);
-            border-radius: 20px;
-            padding: 28px;
-            box-shadow: var(--shadow);
             margin-bottom: 28px;
         }
 
@@ -130,13 +156,6 @@ $total_income_sum = array_sum(array_column($income_cat_data, 'total'));
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 24px;
-        }
-
-        .triple-chart-card {
-            background: var(--white);
-            border-radius: 20px;
-            padding: 24px;
-            box-shadow: var(--shadow);
         }
 
         .chart-badge {
@@ -185,7 +204,6 @@ $total_income_sum = array_sum(array_column($income_cat_data, 'total'));
         }
 
         @media (max-width: 900px) {
-            .main-content { margin-left: 0; padding: 20px; }
             .triple-charts { grid-template-columns: 1fr; }
             .dashboard-header { flex-direction: column; align-items: flex-start; gap: 12px; }
         }
@@ -200,23 +218,23 @@ $total_income_sum = array_sum(array_column($income_cat_data, 'total'));
 </head>
 <body>
 
-<div class="main-content">
+<div class="main-content animate-fade-in">
 
     <!-- Header -->
-    <div class="dashboard-header">
+    <div class="dashboard-header" style="margin-bottom: 30px;">
         <div>
-            <h1>Welcome Back, <?php echo htmlspecialchars($_SESSION['name']); ?></h1>
-            <p class="subtitle">Here's your financial overview for this week</p>
+            <h1 class="page-title">Welcome Back, <?php echo htmlspecialchars($_SESSION['name']); ?></h1>
+            <p class="subtitle" style="color: var(--text-muted); font-size: 15px;">Here's your financial overview for this week</p>
         </div>
         <div class="header-date">
-            <span><?php echo date("F d, Y"); ?></span>
+            <span class="badge badge-income" style="font-size: 14px; padding: 10px 20px;"><?php echo date("F d, Y"); ?></span>
         </div>
     </div>
 
     <!-- Summary Cards -->
     <div class="summary-grid">
 
-        <div class="summary-card income-card">
+        <div class="summary-card glass-card">
             <div class="card-icon income-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
@@ -228,7 +246,7 @@ $total_income_sum = array_sum(array_column($income_cat_data, 'total'));
             </div>
         </div>
 
-        <div class="summary-card expense-card">
+        <div class="summary-card glass-card">
             <div class="card-icon expense-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/>
@@ -244,7 +262,7 @@ $total_income_sum = array_sum(array_column($income_cat_data, 'total'));
     </div>
 
     <!-- Trend Chart (Full Width) -->
-    <div class="chart-fullwidth">
+    <div class="chart-fullwidth glass-card animate-fade-in">
         <div class="chart-header">
             <h3>Income vs Expense Trend</h3>
             <div class="chart-controls">
@@ -260,7 +278,7 @@ $total_income_sum = array_sum(array_column($income_cat_data, 'total'));
     <div class="triple-charts">
 
         <!-- Income vs Expense Overview -->
-        <div class="triple-chart-card">
+        <div class="glass-card animate-fade-in" style="animation-delay: 0.1s;">
             <div class="chart-header">
                 <h3>Income vs Expense</h3>
                 <span class="chart-badge badge-neutral">Overview</span>
@@ -279,7 +297,7 @@ $total_income_sum = array_sum(array_column($income_cat_data, 'total'));
         </div>
 
         <!-- Expense by Category -->
-        <div class="triple-chart-card">
+        <div class="glass-card animate-fade-in" style="animation-delay: 0.2s;">
             <div class="chart-header">
                 <h3>Expense Breakdown</h3>
                 <span class="chart-badge badge-expense">by Category</span>
@@ -298,7 +316,7 @@ $total_income_sum = array_sum(array_column($income_cat_data, 'total'));
         </div>
 
         <!-- Income by Category -->
-        <div class="triple-chart-card">
+        <div class="glass-card animate-fade-in" style="animation-delay: 0.3s;">
             <div class="chart-header">
                 <h3>Income Breakdown</h3>
                 <span class="chart-badge badge-income">by Category</span>

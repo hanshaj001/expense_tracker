@@ -149,3 +149,4 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         });
     })();
 </script>
+<script src="../assets/app.js"></script>

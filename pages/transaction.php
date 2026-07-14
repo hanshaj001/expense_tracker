@@ -11,16 +11,17 @@ if(!isset($_SESSION['name'])){
 
 $user_id = $_SESSION['user_id'];
 ?>
+<link rel="stylesheet" href="../assets/global.css">
 
-<div class="container-fluid py-4" style="margin-left: 260px; width: calc(100% - 260px);">
+<div class="main-content animate-fade-in">
 
     <div class="py-3">
-        <h2 class="text-center">Transactions</h2>
+        <h2 class="text-center page-title">Transactions</h2>
        <p> <?php echo $_POST['delete_transaction'] ?? ''; ?></p>
         <div class="container">
             <div class="row">
                 <div class="col-12 mb-3">
-                    <a class="btn btn-primary" href="#">Search</a>
+                    <a class="btn-gradient" style="display: inline-block; width: auto; text-decoration: none;" href="#">Search</a>
                 </div>
             </div>
         </div>
@@ -28,8 +29,9 @@ $user_id = $_SESSION['user_id'];
 
     <div class="row justify-content-center">
         <div class="col-12 d-flex justify-content-center"> 
-            <table class="table table-bordered table-striped w-75">
-                <thead class="table-dark text-center">
+            <div class="glass-card w-75">
+            <table class="premium-table">
+                <thead>
                     <tr>
                         <th>ID</th>
                         <th>Name</th>
@@ -39,7 +41,7 @@ $user_id = $_SESSION['user_id'];
                         <th>Operation</th>
                     </tr>
                 </thead>
-                <tbody class="text-center">
+                <tbody>
 
                 <?php 
                 $count = 1;
@@ -80,6 +82,7 @@ $user_id = $_SESSION['user_id'];
 
                 </tbody>
             </table>
+            </div>
         </div>
     </div>
 

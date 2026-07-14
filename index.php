@@ -67,7 +67,9 @@ mysqli_close($conn);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign In</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="./assets/index.css">
+    <link rel="stylesheet" href="./assets/global.css">
 </head>
 <body>
     <!-- Decorative circles -->
@@ -94,15 +96,15 @@ mysqli_close($conn);
             <form id="loginForm" method="POST" action="">
                 <div class="form-group">
                     <div class="input-wrapper">
-                        <span class="input-icon">👤</span>
-                        <input type="email" id="email" name="email" placeholder="User email" value="<?php echo $email ?? '';?>" required>
+                        <span class="input-icon"><i class="fas fa-user"></i></span>
+                        <input type="email" id="email" name="email" placeholder="User email" class="form-control" value="<?php echo $email ?? '';?>" required>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <div class="input-wrapper password-wrapper">
-                        <span class="input-icon">🔑</span>
-                        <input type="password" id="password" name="password" placeholder="Password" value="<?php echo $password ?? '';?>" required>
+                        <span class="input-icon"><i class="fas fa-lock"></i></span>
+                        <input type="password" id="password" name="password" placeholder="Password" class="form-control" value="<?php echo $password ?? '';?>" required>
                         <button type="button" class="show-password" onclick="togglePassword()">SHOW</button>
                     </div>
                 </div>
@@ -115,16 +117,16 @@ mysqli_close($conn);
                     <a href="#" class="forgot-password">Forgot Password?</a>
                 </div> -->
 
-                <button type="submit" class="btn-signin">Log in</button>
-                <span style="text-align: center; color: red; font-weight: bold;"><?php echo $errors['invalid'] ?? ''; ?></span>
-                <span style="text-align: center; color: red; font-weight: bold;"><?php echo $errors['not_found'] ?? ''; ?></span>
+                <button type="submit" class="btn-gradient">Log in</button>
+                <span class="error-msg" style="text-align: center;"><?php echo $errors['invalid'] ?? ''; ?></span>
+                <span class="error-msg" style="text-align: center;"><?php echo $errors['not_found'] ?? ''; ?></span>
             </form>
             <!-- BACKEND FORM END -->
 
             <div style="text-align: center;">OR</div>
 
             <div class="signup-link">
-                Don't have an account? <a href="./pages/register_user.php">Sign Up</a>
+                Don't have an account? <a href="./pages/register_user.php" class="styled-link">Sign Up</a>
             </div>
         </div>
     </div>

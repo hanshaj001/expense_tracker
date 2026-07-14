@@ -86,15 +86,16 @@ include("../includes/header.php");
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="../assets/categories.css">
+    <link rel="stylesheet" href="../assets/global.css">
 </head>
 <body>
 
 <!-- Main Content -->
-<div class="categories-container">
+<div class="main-content animate-fade-in categories-container">
 
     <!-- Page Header -->
-    <div class="page-header">
-        <h2>Categories</h2>
+    <div class="page-header" style="margin-top: 20px;">
+        <h2 class="page-title">Categories</h2>
 
         <?php if(!empty($success)): ?>
             <div id="flashMessage" class="alert alert-success text-center">
@@ -336,7 +337,7 @@ include("../includes/header.php");
 
                     <div class="modal-footer px-0 pb-0">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-save" name="submit">
+                        <button type="submit" class="btn-gradient" name="submit" style="width: auto;">
                             <i class="fas fa-save"></i> Save Limit
                         </button>
                     </div>

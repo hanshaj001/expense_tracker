@@ -67,55 +67,93 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 ?>
 
 <!-- HTML form -->
-</div>
-<div class="container">
-    <div class="card register-card">
-        <div class="card-header bg-primary text-center text-white">
-            Register
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/index.css">
+    <link rel="stylesheet" href="../assets/global.css">
+</head>
+<body>
+    <!-- Decorative circles -->
+    <div class="circle circle-1"></div>
+    <div class="circle circle-2"></div>
+    <div class="circle circle-3"></div>
+    <div class="circle circle-4"></div>
+
+    <div class="container animate-fade-in">
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <div class="welcome-content">
+                <h1>Join Us</h1>
+                <p class="subtitle">Start managing your finances today</p>
+            </div>
         </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-12">
-                    <!-- Note: The form must submit to this same file -->
-                    <form action="" method="post">
-                        <div class="mb-3">
-                            <label class="form-label">User Name</label>
-                            <input type="text" name="name" placeholder="Enter username" class="form-control" value="<?php echo $name ?? ''; ?>" required>
-                            <span style="color: red; text-align: center;"><?php echo $errors['name'] ?? ''; ?></span>
-                            <span style="color: red; text-align: center;"><?php echo $errors['name_length'] ?? ''; ?></span>
-                            <span style="color: red; text-align: center;"><?php echo $errors['name_pattern'] ?? ''; ?></span>
-                        </div>
 
-                        <!-- for email -->
-                      <div class="mb-3">
-                            <label class="form-label">Email</label>
-                            <input type="email" name="email" placeholder="Enter email" class="form-control" value="<?php echo $email ?? ''; ?>" required>
-                            <span style="color: red; text-align: center;"><?php echo $errors['email'] ?? ''; ?></span>
-                            <span style="color: red; text-align: center;"><?php echo $errors['email_validate'] ?? ''; ?></span>
+        <!-- Register Section -->
+        <div class="login-section">
+            <h2>Sign Up</h2>
+            <p class="description">Create your account to get started.</p>
 
-                        </div>
-
-                        <!-- pass -->
-                        <div class="mb-3">
-                            <label class="form-label">Password</label>
-                            <input type="password" name="password" placeholder="Enter password" class="form-control" value="<?php echo $password ?? ''; ?>" required>
-                            <span style="color: red; text-align: center;"><?php echo $errors['password'] ?? ''; ?></span>
-                            <span style="color: red; text-align: center;"><?php echo $errors['password_length'] ?? ''; ?></span>
-
-                        </div>
-            
-
-                        <div class="mb-3">
-                            <button type="submit" class="btn btn-primary w-100">Register</button>
-                            <span style="color: red; text-align: center;"><?php echo $errors['register'] ?? ''; ?></span>
-                        </div>
-                    </form>
-
+            <form action="" method="post">
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <span class="input-icon"><i class="fas fa-user"></i></span>
+                        <input type="text" name="name" placeholder="User Name" class="form-control" value="<?php echo $name ?? ''; ?>" required minlength="3" pattern="[a-zA-Z ]+">
+                    </div>
+                    <span class="error-msg"><?php echo $errors['name'] ?? ''; ?></span>
+                    <span class="error-msg"><?php echo $errors['name_length'] ?? ''; ?></span>
+                    <span class="error-msg"><?php echo $errors['name_pattern'] ?? ''; ?></span>
                 </div>
+
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <span class="input-icon"><i class="fas fa-envelope"></i></span>
+                        <input type="email" name="email" placeholder="Email Address" class="form-control" value="<?php echo $email ?? ''; ?>" required>
+                    </div>
+                    <span class="error-msg"><?php echo $errors['email'] ?? ''; ?></span>
+                    <span class="error-msg"><?php echo $errors['email_validate'] ?? ''; ?></span>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-wrapper password-wrapper">
+                        <span class="input-icon"><i class="fas fa-lock"></i></span>
+                        <input type="password" name="password" id="password" placeholder="Password" class="form-control" required minlength="6">
+                        <button type="button" class="show-password" onclick="togglePassword()">SHOW</button>
+                    </div>
+                    <span class="error-msg"><?php echo $errors['password'] ?? ''; ?></span>
+                    <span class="error-msg"><?php echo $errors['password_length'] ?? ''; ?></span>
+                </div>
+
+                <button type="submit" class="btn-gradient">Register</button>
+                <span class="error-msg" style="text-align: center; display: block; margin-top: 10px;"><?php echo $errors['register'] ?? ''; ?></span>
+            </form>
+
+            <div class="signup-link">
+                Already have an account? <a href="../index.php" class="styled-link">Log In</a>
             </div>
         </div>
     </div>
-</div>
+
+    <script>
+        function togglePassword() {
+            const passwordField = document.getElementById('password');
+            const btn = document.querySelector('.show-password');
+            
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                btn.textContent = 'HIDE';
+            } else {
+                passwordField.type = 'password';
+                btn.textContent = 'SHOW';
+            }
+        }
+    </script>
+</body>
+</html>
 
 <?php
 include("../includes/footer.php");

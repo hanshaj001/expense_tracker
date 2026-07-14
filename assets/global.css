@@ -1,0 +1,269 @@
+/* Premium Global Variables - Modern Minimal */
+:root {
+    --primary: #6366f1; /* Indigo 500 */
+    --primary-hover: #4f46e5; /* Indigo 600 */
+    --secondary: #8b5cf6; /* Violet 500 */
+    
+    --bg-main: #f8fafc; /* Slate 50 */
+    --card-bg: #ffffff;
+    
+    --text-dark: #0f172a; /* Slate 900 */
+    --text-muted: #64748b; /* Slate 500 */
+    --text-light: #ffffff;
+    
+    --border-color: #e2e8f0; /* Slate 200 */
+    --danger: #ef4444; /* Red 500 */
+    --success: #10b981; /* Emerald 500 */
+    
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    
+    --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    --shadow-hover: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    
+    --transition: all 0.25s ease-in-out;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg-main);
+    color: var(--text-dark);
+}
+
+/* Beautiful Modern Card */
+.glass-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
+    padding: 32px;
+    position: relative;
+    transition: var(--transition);
+}
+.glass-card:hover {
+    box-shadow: var(--shadow-hover);
+}
+
+/* Page Titles */
+.page-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 24px;
+    letter-spacing: -0.5px;
+}
+
+/* Modern Form Group */
+.form-group {
+    margin-bottom: 22px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 14px;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+.input-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 16px 12px 44px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    background: var(--card-bg);
+    transition: var(--transition);
+    color: var(--text-dark);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+}
+
+.form-control:focus + .input-icon, 
+.input-wrapper:focus-within .input-icon {
+    color: var(--primary);
+}
+
+/* Validation Errors */
+.error-msg {
+    color: var(--danger);
+    font-size: 13px;
+    margin-top: 6px;
+    display: block;
+    font-weight: 500;
+}
+
+.success-msg {
+    color: var(--success);
+    font-size: 14px;
+    margin-top: 16px;
+    display: block;
+    font-weight: 600;
+    text-align: center;
+    background: rgba(16, 185, 129, 0.1);
+    padding: 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+/* Modern Buttons */
+.btn-gradient {
+    width: 100%;
+    padding: 12px 20px;
+    background: var(--primary);
+    color: var(--text-light);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Button Ripple Effect */
+.btn-gradient .ripple {
+    position: absolute;
+    border-radius: 50%;
+    transform: scale(0);
+    animation: ripple 0.6s linear;
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
+@keyframes ripple {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+.btn-gradient:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 10px -1px rgba(99, 102, 241, 0.4);
+}
+
+/* Link Styles */
+.styled-link {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.styled-link:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* Table Design */
+.premium-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 16px;
+}
+
+.premium-table th {
+    background: var(--bg-main);
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 14px 16px;
+    border-bottom: 2px solid var(--border-color);
+    text-align: left;
+}
+
+.premium-table th:first-child { border-top-left-radius: var(--radius-md); }
+.premium-table th:last-child { border-top-right-radius: var(--radius-md); }
+
+.premium-table td {
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-dark);
+    font-size: 14px;
+    transition: var(--transition);
+}
+
+.premium-table tr:hover td {
+    background: var(--bg-main);
+}
+
+/* Badges */
+.badge {
+    padding: 4px 10px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.badge-expense { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+.badge-income { background: #dcfce3; color: #16a34a; border: 1px solid #bbf7d0; }
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .glass-card {
+        padding: 20px;
+        border-radius: var(--radius-md);
+    }
+    
+    .page-title {
+        font-size: 22px;
+    }
+    
+    .form-control {
+        padding: 12px 15px 12px 40px;
+    }
+    
+    .premium-table th, .premium-table td {
+        padding: 12px 10px;
+        font-size: 13px;
+    }
+    
+    .premium-table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}

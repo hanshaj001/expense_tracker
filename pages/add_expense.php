@@ -87,53 +87,69 @@ include("../includes/header.php");
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Expense</title>
     <link rel="stylesheet" href="../assets/income_expense.css"> <!-- Link your CSS file -->
+    <link rel="stylesheet" href="../assets/global.css">
 </head>
 <body>
-<div class="et-main-content" style="margin-left: 300px; padding-top: 20px;">
+<div class="main-content animate-fade-in">
 <div class="form-wrapper">
-    <div class="et-form-card">
-        <h4 class="et-form-title">Add Expense</h4>
+    <div class="glass-card">
+        <h4 class="page-title">Add Expense</h4>
 
         <form method="POST" action="" class="et-form">
 
-            <div class="et-form-group">
+            <div class="form-group">
                  <label>Amount</label>
-                <input type="number" name="amount" value="<?php echo $amount ?? '' ;?>" placeholder="Enter amount" required>
-                <span style="color: red;"><?php echo $errors['amount'] ?? ''; ?></span>
+                 <div class="input-wrapper">
+                    <span class="input-icon"><i class="fas fa-rupee-sign"></i></span>
+                    <input type="number" name="amount" class="form-control" value="<?php echo $amount ?? '' ;?>" placeholder="Enter amount" min="0.01" step="0.01" required>
+                 </div>
+                <span class="error-msg"><?php echo $errors['amount'] ?? ''; ?></span>
             </div>
 
-            <div class="et-form-group">
+            <div class="form-group">
                 <label>Category</label>
-                <select name="category" required>
-                    <option value="">-- Select Expense Type --</option>
-                    <option value="11" <?php if($category_id == 11) echo 'selected'; ?>>Food & Groceries</option>
-                    <option value="12" <?php if($category_id == 12) echo 'selected'; ?>>Rent</option>
-                    <option value="13" <?php if($category_id == 13) echo 'selected'; ?>>Transportation</option>
-                    <option value="14" <?php if($category_id == 14) echo 'selected'; ?>>Utilities</option>
-                    <option value="15" <?php if($category_id == 15) echo 'selected'; ?>>Internet & Mobile</option>
-                    <option value="16" <?php if($category_id == 16) echo 'selected'; ?>>Education</option>
-                    <option value="17" <?php if($category_id == 17) echo 'selected'; ?>>Healthcare</option>
-                    <option value="18" <?php if($category_id == 18) echo 'selected'; ?>>Entertainment</option>
-                    <option value="19" <?php if($category_id == 19) echo 'selected'; ?>>Shopping</option>
-                    <option value="20" <?php if($category_id == 20) echo 'selected'; ?>>Other Expenses</option>
-                </select>
+                <div class="input-wrapper">
+                    <span class="input-icon"><i class="fas fa-folder"></i></span>
+                    <select name="category" class="form-control" required>
+                        <option value="">-- Select Expense Type --</option>
+                        <option value="11" <?php if($category_id == 11) echo 'selected'; ?>>Food & Groceries</option>
+                        <option value="12" <?php if($category_id == 12) echo 'selected'; ?>>Rent</option>
+                        <option value="13" <?php if($category_id == 13) echo 'selected'; ?>>Transportation</option>
+                        <option value="14" <?php if($category_id == 14) echo 'selected'; ?>>Utilities</option>
+                        <option value="15" <?php if($category_id == 15) echo 'selected'; ?>>Internet & Mobile</option>
+                        <option value="16" <?php if($category_id == 16) echo 'selected'; ?>>Education</option>
+                        <option value="17" <?php if($category_id == 17) echo 'selected'; ?>>Healthcare</option>
+                        <option value="18" <?php if($category_id == 18) echo 'selected'; ?>>Entertainment</option>
+                        <option value="19" <?php if($category_id == 19) echo 'selected'; ?>>Shopping</option>
+                        <option value="20" <?php if($category_id == 20) echo 'selected'; ?>>Other Expenses</option>
+                    </select>
+                </div>
+                <span class="error-msg"><?php echo $errors['category'] ?? ''; ?></span>
             </div>
 
-            <div class="et-form-group">
+            <div class="form-group">
                 <label>Date</label>
-                <input type="date" name="expense_date" required value="<?php echo $expense_date;?>">
-                <span style="color: red;"><?php echo $errors['expense_date'] ?? ''; ?></span>
-                <span style="color: red;"><?php echo $errors['date_excessed'] ?? ''; ?></span>
+                <div class="input-wrapper">
+                    <span class="input-icon"><i class="fas fa-calendar-alt"></i></span>
+                    <input type="date" name="expense_date" class="form-control" required value="<?php echo $expense_date;?>" max="<?php echo date('Y-m-d'); ?>">
+                </div>
+                <span class="error-msg"><?php echo $errors['expense_date'] ?? ''; ?></span>
+                <span class="error-msg"><?php echo $errors['date_excessed'] ?? ''; ?></span>
             </div>
 
-           <div class="et-form-group">
+           <div class="form-group">
                 <label>Note (Optional)</label>
-                <textarea name="note" rows="3"><?php echo $notes;?></textarea>
+                <div class="input-wrapper">
+                    <span class="input-icon"><i class="fas fa-sticky-note"></i></span>
+                    <textarea name="note" class="form-control" rows="3"><?php echo $notes;?></textarea>
+                </div>
             </div>
 
-            <button type="submit" class="et-btn-primary">
+            <button type="submit" class="btn-gradient">
                 <i class="bi bi-plus-circle"></i> Save Expense</button>
-                <span class="et-form-group text-success"><p><?php echo $success ?? '';?></p></span>
+            <?php if(!empty($success)): ?>
+                <span class="success-msg"><?php echo $success; ?></span>
+            <?php endif; ?>
 
         </form>
     </div>
