@@ -86,7 +86,7 @@ include("../includes/header.php");
                     <input type="date" name="expense_date" class="form-control" value="<?php echo $expense_date ?? ''; ?>" max="<?php echo date('Y-m-d'); ?>" required>
                 </div>
                 <span class="error-msg"><?php echo $errors['expense_date'] ?? ''; ?></span>
-            </div>
+            </div> 
 
             <div class="form-group">
                 <label>Note (Optional)</label>
