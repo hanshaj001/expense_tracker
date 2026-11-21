@@ -11,20 +11,20 @@ if (isset($_SESSION['user_id'])) {
 include("../includes/function.php");
 include("../includes/db_conn.php");
 
-$name = '';
+$name     = '';
 $password = '';
-$email = '';
-$errors = [];
+$email    = '';
+$errors   = [];
 
 // Handle sign up submission
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     // Safely collect and trim inputs
-    $name = trim($_POST['name'] ?? '');
+    $name     = trim($_POST['name'] ?? '');
     $password = trim($_POST['password'] ?? '');
-    $email = trim($_POST['email'] ?? '');
+    $email    = trim($_POST['email'] ?? '');
 
-    // Validate name
+    // 1. Validate full name (Multiple users can have the same name)
     if (empty($name)) {
         $errors['name'] = "Name is required.";
     } elseif (strlen($name) < 3) {
@@ -33,26 +33,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $errors['name'] = "Name can contain only letters and spaces.";
     }
 
-    // Validate email
+    // 2. Validate email address (Must be unique for authentication/login)
     if (empty($email)) {
         $errors['email'] = "Email is required.";
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $errors['email'] = "Please provide a valid email address.";
     } else {
-        // Check if email is already registered
+        // Check if email is already registered in DB
         $check_stmt = mysqli_prepare($conn, "SELECT id FROM users WHERE email = ?");
         if ($check_stmt) {
             mysqli_stmt_bind_param($check_stmt, "s", $email);
             mysqli_stmt_execute($check_stmt);
             $check_res = mysqli_stmt_get_result($check_stmt);
             if (mysqli_num_rows($check_res) > 0) {
-                $errors['email'] = "An account with this email already exists.";
+                $errors['email'] = "An account with this email address already exists.";
             }
             mysqli_stmt_close($check_stmt);
         }
     }
 
-    // Validate password
+    // 3. Validate password
     if (empty($password)) {
         $errors['password'] = "Password is required.";
     } elseif (strlen($password) < 6) {
@@ -65,20 +65,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $enc_password = password_hash($password, PASSWORD_BCRYPT);
 
         // Insert using prepared statement to prevent SQL injection
-        $insert_sql = "INSERT INTO users (name, password, email) VALUES (?, ?, ?)";
+        $insert_sql  = "INSERT INTO users (name, password, email) VALUES (?, ?, ?)";
         $insert_stmt = mysqli_prepare($conn, $insert_sql);
 
         if ($insert_stmt) {
             mysqli_stmt_bind_param($insert_stmt, "sss", $name, $enc_password, $email);
-            if (mysqli_stmt_execute($insert_stmt)) {
-                mysqli_stmt_close($insert_stmt);
-                mysqli_close($conn);
 
-                // Redirect to login page upon success
-                header("Location: ../index.php");
-                exit();
-            } else {
-                $errors['register'] = "Error while creating your account. Please try again.";
+            try {
+                if (mysqli_stmt_execute($insert_stmt)) {
+                    mysqli_stmt_close($insert_stmt);
+                    mysqli_close($conn);
+
+                    // Redirect to login page upon success
+                    header("Location: ../index.php");
+                    exit();
+                } else {
+                    $errors['register'] = "Error while creating your account. Please try again.";
+                }
+            } catch (mysqli_sql_exception $e) {
+                // Handle duplicate email gracefully without fatal crash
+                if ($e->getCode() === 1062) {
+                    $errors['email'] = "An account with this email address already exists.";
+                } else {
+                    $errors['register'] = "Database error during registration. Please try again.";
+                }
             }
             mysqli_stmt_close($insert_stmt);
         } else {
@@ -86,7 +96,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 }
- 
+
 mysqli_close($conn);
 ?>
 <!DOCTYPE html>
@@ -162,7 +172,7 @@ mysqli_close($conn);
                         <span class="input-icon"><i class="fas fa-envelope"></i></span>
                         <input 
                             type="email" 
-                            id="email"
+                            id="email" 
                             name="email" 
                             placeholder="name@example.com" 
                             class="form-control" 
