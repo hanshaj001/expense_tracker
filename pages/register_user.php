@@ -1,143 +1,221 @@
 <?php
-include("../includes/header.php");
+// Start session for register flow
+session_start();
+
+// If user is already logged in, redirect directly to dashboard
+if (isset($_SESSION['user_id'])) {
+    header("Location: user_dashboard.php");
+    exit();
+}
+
 include("../includes/function.php");
 include("../includes/db_conn.php");
-?>
 
-<?php
-    $name = '';
-    $password = '';
-    $email = '';
-    $errors = [];
-    $success = '';
-// taking inputs 
+$name = '';
+$password = '';
+$email = '';
+$errors = [];
+
+// Handle sign up submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    // collecting data safely and trimming whitespace
-    $name = trim($_POST['name']);
-    $password = trim($_POST['password']);
-    $email = trim($_POST['email']);
+    // Safely collect and trim inputs
+    $name = trim($_POST['name'] ?? '');
+    $password = trim($_POST['password'] ?? '');
+    $email = trim($_POST['email'] ?? '');
 
-    // validating name
-    if(empty($name)){
-        $errors['name'] = "Name is required .";
+    // Validate name
+    if (empty($name)) {
+        $errors['name'] = "Name is required.";
+    } elseif (strlen($name) < 3) {
+        $errors['name'] = "Name must be at least 3 characters long.";
+    } elseif (!preg_match("/^[a-zA-Z ]+$/", $name)) {
+        $errors['name'] = "Name can contain only letters and spaces.";
     }
 
-    if(strlen($name)<3){
-        $errors['name_length'] = "Name must be at least 3 characters long";
+    // Validate email
+    if (empty($email)) {
+        $errors['email'] = "Email is required.";
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors['email'] = "Please provide a valid email address.";
+    } else {
+        // Check if email is already registered
+        $check_stmt = mysqli_prepare($conn, "SELECT id FROM users WHERE email = ?");
+        if ($check_stmt) {
+            mysqli_stmt_bind_param($check_stmt, "s", $email);
+            mysqli_stmt_execute($check_stmt);
+            $check_res = mysqli_stmt_get_result($check_stmt);
+            if (mysqli_num_rows($check_res) > 0) {
+                $errors['email'] = "An account with this email already exists.";
+            }
+            mysqli_stmt_close($check_stmt);
+        }
     }
 
-    if(!preg_match("/^[a-zA-Z ]+$/",$name)){
-            $errors['name_pattern'] = "Name can contain only letters and spaces";
+    // Validate password
+    if (empty($password)) {
+        $errors['password'] = "Password is required.";
+    } elseif (strlen($password) < 6) {
+        $errors['password'] = "Password must be at least 6 characters long.";
     }
 
-    // password
-    if(empty($password)){
-        $errors['password'] ="Password is required";
-    }
-    if(strlen($password)<6){
-        $errors['password_length'] = "Password must be at least 6 characters long";
-    }
-    // enc password
-    $enc_password = password_hash($password,PASSWORD_BCRYPT);
+    // If no validation errors, proceed to insert into database
+    if (empty($errors)) {
+        // Hash password securely with BCRYPT
+        $enc_password = password_hash($password, PASSWORD_BCRYPT);
 
-    // emails 
-    if(empty($email)){
-        $errors['email'] = "Email is required";
+        // Insert using prepared statement to prevent SQL injection
+        $insert_sql = "INSERT INTO users (name, password, email) VALUES (?, ?, ?)";
+        $insert_stmt = mysqli_prepare($conn, $insert_sql);
+
+        if ($insert_stmt) {
+            mysqli_stmt_bind_param($insert_stmt, "sss", $name, $enc_password, $email);
+            if (mysqli_stmt_execute($insert_stmt)) {
+                mysqli_stmt_close($insert_stmt);
+                mysqli_close($conn);
+
+                // Redirect to login page upon success
+                header("Location: ../index.php");
+                exit();
+            } else {
+                $errors['register'] = "Error while creating your account. Please try again.";
+            }
+            mysqli_stmt_close($insert_stmt);
+        } else {
+            $errors['register'] = "Database error. Please try again later.";
+        }
     }
-    if(!filter_var($email,FILTER_VALIDATE_EMAIL)){
-        $errors['email_validate'] = "Need a valid email";
-    }
-
-    // inserting data into databases
-    if(empty($errors)){
-    $sql = "INSERT into users(name,password,email)
-    values ('$name','$enc_password','$email')";
-
-    if(mysqli_query($conn,$sql)){
-        header("Location: ../index.php")
-;    }
-    else 
-        $errors['register'] = "Error while registering....";
-
-    mysqli_close($conn);
 }
-    }
-    
-?>
 
-<!-- HTML form -->
+mysqli_close($conn);
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
+    <title>Sign Up - Expense Tracker</title>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="../assets/index.css">
+
+    <!-- Global CSS & Auth Specific Styling -->
     <link rel="stylesheet" href="../assets/global.css">
+    <link rel="stylesheet" href="../assets/index.css">
 </head>
-<body>
-    <!-- Decorative circles -->
+<body class="auth-page">
+
+    <!-- Ambient background decorative blur circles -->
     <div class="circle circle-1"></div>
     <div class="circle circle-2"></div>
     <div class="circle circle-3"></div>
-    <div class="circle circle-4"></div>
 
-    <div class="container animate-fade-in">
-        <!-- Welcome Section -->
+    <div class="auth-container animate-fade-in">
+
+        <!-- Welcome Banner Section -->
         <div class="welcome-section">
             <div class="welcome-content">
-                <h1>Join Us</h1>
-                <p class="subtitle">Start managing your finances today</p>
+                <div class="brand-icon">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <h1>Join Us Today</h1>
+                <p class="subtitle">Start managing your personal finances, track every penny, and stay within your weekly budgets effortlessly.</p>
             </div>
         </div>
 
-        <!-- Register Section -->
+        <!-- Registration Form Section -->
         <div class="login-section">
-            <h2>Sign Up</h2>
-            <p class="description">Create your account to get started.</p>
+            <h2>Create Account</h2>
+            <p class="description">Fill in the details below to create your free account.</p>
 
             <form action="" method="post">
+                <!-- Name Field -->
                 <div class="form-group">
+                    <label for="name">Full Name</label>
                     <div class="input-wrapper">
                         <span class="input-icon"><i class="fas fa-user"></i></span>
-                        <input type="text" name="name" placeholder="User Name" class="form-control" value="<?php echo $name ?? ''; ?>" required minlength="3" pattern="[a-zA-Z ]+">
+                        <input 
+                            type="text" 
+                            id="name"
+                            name="name" 
+                            placeholder="John Doe" 
+                            class="form-control" 
+                            value="<?php echo htmlspecialchars($name); ?>" 
+                            required 
+                            minlength="3"
+                        >
                     </div>
-                    <span class="error-msg"><?php echo $errors['name'] ?? ''; ?></span>
-                    <span class="error-msg"><?php echo $errors['name_length'] ?? ''; ?></span>
-                    <span class="error-msg"><?php echo $errors['name_pattern'] ?? ''; ?></span>
+                    <?php if (!empty($errors['name'])): ?>
+                        <span class="error-msg"><?php echo htmlspecialchars($errors['name']); ?></span>
+                    <?php endif; ?>
                 </div>
 
+                <!-- Email Field -->
                 <div class="form-group">
+                    <label for="email">Email Address</label>
                     <div class="input-wrapper">
                         <span class="input-icon"><i class="fas fa-envelope"></i></span>
-                        <input type="email" name="email" placeholder="Email Address" class="form-control" value="<?php echo $email ?? ''; ?>" required>
+                        <input 
+                            type="email" 
+                            id="email"
+                            name="email" 
+                            placeholder="name@example.com" 
+                            class="form-control" 
+                            value="<?php echo htmlspecialchars($email); ?>" 
+                            required
+                        >
                     </div>
-                    <span class="error-msg"><?php echo $errors['email'] ?? ''; ?></span>
-                    <span class="error-msg"><?php echo $errors['email_validate'] ?? ''; ?></span>
+                    <?php if (!empty($errors['email'])): ?>
+                        <span class="error-msg"><?php echo htmlspecialchars($errors['email']); ?></span>
+                    <?php endif; ?>
                 </div>
 
+                <!-- Password Field -->
                 <div class="form-group">
+                    <label for="password">Password</label>
                     <div class="input-wrapper password-wrapper">
                         <span class="input-icon"><i class="fas fa-lock"></i></span>
-                        <input type="password" name="password" id="password" placeholder="Password" class="form-control" required minlength="6">
+                        <input 
+                            type="password" 
+                            name="password" 
+                            id="password" 
+                            placeholder="At least 6 characters" 
+                            class="form-control" 
+                            required 
+                            minlength="6"
+                        >
                         <button type="button" class="show-password" onclick="togglePassword()">SHOW</button>
                     </div>
-                    <span class="error-msg"><?php echo $errors['password'] ?? ''; ?></span>
-                    <span class="error-msg"><?php echo $errors['password_length'] ?? ''; ?></span>
+                    <?php if (!empty($errors['password'])): ?>
+                        <span class="error-msg"><?php echo htmlspecialchars($errors['password']); ?></span>
+                    <?php endif; ?>
                 </div>
 
-                <button type="submit" class="btn-gradient">Register</button>
-                <span class="error-msg" style="text-align: center; display: block; margin-top: 10px;"><?php echo $errors['register'] ?? ''; ?></span>
+                <!-- General Register Error -->
+                <?php if (!empty($errors['register'])): ?>
+                    <span class="error-msg" style="text-align: center; margin-bottom: 10px;"><?php echo htmlspecialchars($errors['register']); ?></span>
+                <?php endif; ?>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn-gradient" style="margin-top: 10px;">
+                    <i class="fas fa-user-check"></i> Register Account
+                </button>
             </form>
 
+            <!-- Navigation to Login -->
             <div class="signup-link">
-                Already have an account? <a href="../index.php" class="styled-link">Log In</a>
+                Already have an account? <a href="../index.php">Log In</a>
             </div>
         </div>
+
     </div>
 
+    <!-- Password visibility toggle script -->
     <script>
         function togglePassword() {
             const passwordField = document.getElementById('password');
@@ -154,7 +232,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </script>
 </body>
 </html>
-
-<?php
-include("../includes/footer.php");
-?>

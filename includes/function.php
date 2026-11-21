@@ -1,15 +1,28 @@
 <?php
+// ==========================================================================
+// HELPER FUNCTIONS
+// Simple reusable functions for notifications, security, and auth checks
+// ==========================================================================
 
-//    <!-- here a variable created and put that as a color -->
+// Check if user is authenticated; if not, safely redirect to login page
+function check_login() {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    if (!isset($_SESSION['user_id'])) {
+        header("Location: ../index.php");
+        exit();
+    }
+}
+
+// Display Bootstrap dismissible alert message with proper closing tag
 function my_alert($color, $msg)
 {
 ?>
-    <div style="position: absolute; top:20px; right: 20px;" class="alert alert-<?php echo $color; ?> alert-dismissible fade show" role="alert">
-
-        <!-- printing the message of success or failure while submitting -->
-        <?php echo "$msg"; ?>
+    <div class="alert alert-<?php echo htmlspecialchars($color); ?> alert-dismissible fade show" role="alert" style="margin-bottom: 20px;">
+        <?php echo $msg; ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-
-    <?php
+    </div>
+<?php
 }
-    ?>
+?>

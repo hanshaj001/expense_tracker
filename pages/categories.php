@@ -1,372 +1,271 @@
 <?php
-
+// Start session for auth checks
 session_start();
+
+// 1. Authentication check - Must be checked BEFORE any HTML is sent
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../index.php");
+    exit();
+}
+
 include("../includes/db_conn.php");
+include("../includes/function.php");
+
+$user_id = (int)$_SESSION['user_id'];
+$errors  = [];
+$success = '';
+
+// Handle setting / updating weekly category limit
+if ($_SERVER['REQUEST_METHOD'] === "POST" && isset($_POST['save_limit'])) {
+    $category_id = trim($_POST['categoryId'] ?? '');
+    $limit_amt   = trim($_POST['weeklyLimit'] ?? '');
+
+    if (!is_numeric($limit_amt) || $limit_amt < 0) {
+        $errors['limit'] = "Weekly limit must be a positive number or 0.";
+    } elseif (empty($category_id) || !is_numeric($category_id)) {
+        $errors['limit'] = "Invalid category selected.";
+    } else {
+        $cat_id = (int)$category_id;
+        $amt    = (float)$limit_amt;
+
+        // Check if a weekly limit already exists for this user and category
+        $check_stmt = mysqli_prepare($conn, "SELECT id FROM weekly_limits WHERE category_id = ? AND user_id = ?");
+        mysqli_stmt_bind_param($check_stmt, "ii", $cat_id, $user_id);
+        mysqli_stmt_execute($check_stmt);
+        $check_res = mysqli_stmt_get_result($check_stmt);
+
+        if (mysqli_num_rows($check_res) > 0) {
+            // Update existing limit
+            $update_stmt = mysqli_prepare($conn, "UPDATE weekly_limits SET weekly_limit = ?, updated_at = NOW() WHERE category_id = ? AND user_id = ?");
+            mysqli_stmt_bind_param($update_stmt, "dii", $amt, $cat_id, $user_id);
+            if (mysqli_stmt_execute($update_stmt)) {
+                $success = "Category limit updated successfully!";
+            } else {
+                $errors['limit'] = "Failed to update category limit.";
+            }
+            mysqli_stmt_close($update_stmt);
+        } else {
+            // Insert new limit
+            $insert_stmt = mysqli_prepare($conn, "INSERT INTO weekly_limits (user_id, category_id, weekly_limit) VALUES (?, ?, ?)");
+            mysqli_stmt_bind_param($insert_stmt, "iid", $user_id, $cat_id, $amt);
+            if (mysqli_stmt_execute($insert_stmt)) {
+                $success = "Category limit set successfully!";
+            } else {
+                $errors['limit'] = "Failed to set category limit.";
+            }
+            mysqli_stmt_close($insert_stmt);
+        }
+        mysqli_stmt_close($check_stmt);
+    }
+}
+
+// Fetch all active weekly limits for the current user
+$limits_map = [];
+$limit_stmt = mysqli_prepare($conn, "SELECT category_id, weekly_limit FROM weekly_limits WHERE user_id = ?");
+mysqli_stmt_bind_param($limit_stmt, "i", $user_id);
+mysqli_stmt_execute($limit_stmt);
+$limit_res = mysqli_stmt_get_result($limit_stmt);
+while ($l_row = mysqli_fetch_assoc($limit_res)) {
+    $limits_map[$l_row['category_id']] = (float)$l_row['weekly_limit'];
+}
+mysqli_stmt_close($limit_stmt);
+
+// Fetch categories from DB grouped by type (Expense & Income)
+$expense_cats = [];
+$income_cats  = [];
+$cat_query = mysqli_query($conn, "SELECT id, name, type FROM categories ORDER BY id ASC");
+while ($c_row = mysqli_fetch_assoc($cat_query)) {
+    if ($c_row['type'] === 'expense') {
+        $expense_cats[] = $c_row;
+    } else {
+        $income_cats[] = $c_row;
+    }
+}
+
+// Icon helper for standard categories
+function getCategoryIcon($name) {
+    $map = [
+        'Food & Groceries'   => 'fas fa-shopping-cart',
+        'Rent'               => 'fas fa-home',
+        'Transportation'     => 'fas fa-bus',
+        'Utilities'          => 'fas fa-lightbulb',
+        'Internet & Mobile'  => 'fas fa-wifi',
+        'Education'          => 'fas fa-graduation-cap',
+        'Healthcare'         => 'fas fa-heartbeat',
+        'Entertainment'      => 'fas fa-film',
+        'Shopping'           => 'fas fa-shopping-bag',
+        'Other Expenses'     => 'fas fa-ellipsis-h',
+        'Salary'             => 'fas fa-money-bill-wave',
+        'Business Income'    => 'fas fa-briefcase',
+        'Freelance Work'     => 'fas fa-laptop-code',
+        'Investment Returns' => 'fas fa-chart-line',
+        'Rental Income'      => 'fas fa-building',
+        'Bonus'              => 'fas fa-award',
+        'Interest Income'    => 'fas fa-percentage',
+        'Gifts Received'     => 'fas fa-gift',
+        'Dividends'          => 'fas fa-coins',
+        'Other Income'       => 'fas fa-plus-circle'
+    ];
+    return $map[$name] ?? 'fas fa-tag';
+}
+
+$page_title = "Categories & Limits - Expense Tracker";
 include("../includes/header.php");
 ?>
 
-<?php 
-
-    $user_id = $_SESSION['user_id'];
-    $errors  = [];
-    $success;
-    $category_id;
-
-    if($_SERVER['REQUEST_METHOD'] == "POST"){
-        $category_name      = $_POST['categoryName'];
-        $category_limit_amt = $_POST['weeklyLimit'];
-     
-        if($category_limit_amt < 0){
-            $errors['limit_amt'] = "Amount cannot be less than 0";
-        }
-
-        $display_cat[$category_name] = $category_limit_amt;    
-        $category_result = mysqli_query($conn, "SELECT * FROM categories WHERE name = '$category_name';");
-        if(mysqli_num_rows($category_result) == 1){
-            $category_row = mysqli_fetch_assoc($category_result);
-            $category_id  = $category_row['id'];
-        }
-
-        // Check if limit already exists
-        $check = mysqli_query($conn, "SELECT id FROM weekly_limits WHERE category_id = $category_id AND user_id = $user_id;");
-
-        if(mysqli_num_rows($check) > 0){
-            // Update existing limit
-            $update_result = mysqli_query($conn, "UPDATE weekly_limits 
-                SET weekly_limit = $category_limit_amt
-                WHERE user_id = $user_id AND category_id = $category_id;");
-
-            if($update_result)
-                $success = "Updated Category Limit.";
-            else
-                $errors['limit_error'] = "Error while updating limit";
-
-        } else {
-
-            if(empty($errors)){
-                // Insert new limit
-                $insert_result = mysqli_query($conn, "INSERT INTO weekly_limits(user_id, category_id, weekly_limit)
-                    VALUES($user_id, $category_id, $category_limit_amt);");
-
-                if($insert_result)
-                    $success = "Limit Set Successfully";
-                else
-                    $errors['limit_error'] = "Error while setting new limit";
-            }
-        }
-    }
-    
-    // Fetch all limits for display
-    $display_result = mysqli_query($conn, "SELECT c.name, wl.weekly_limit
-        FROM weekly_limits wl JOIN categories c ON wl.category_id = c.id 
-        WHERE wl.user_id = $user_id;");
-
-    if(mysqli_num_rows($display_result) > 0){
-        while($display_row = mysqli_fetch_assoc($display_result)){
-            $display_cat[$display_row['name']] = $display_row['weekly_limit'];
-        }
-    }
-?>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Categories - Expense Tracker</title>
-
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="../assets/categories.css">
-    <link rel="stylesheet" href="../assets/global.css">
-</head>
-<body>
-
-<!-- Main Content -->
-<div class="main-content animate-fade-in categories-container">
+<div class="main-content animate-fade-in">
 
     <!-- Page Header -->
-    <div class="page-header" style="margin-top: 20px;">
-        <h2 class="page-title">Categories</h2>
-
-        <?php if(!empty($success)): ?>
-            <div id="flashMessage" class="alert alert-success text-center">
-                <?php echo $success; ?>
-            </div>
-        <?php endif; ?>
-
-        <?php if(!empty($errors)): ?>
-            <div id="flashMessageError" class="alert alert-danger text-center">
-                <?php echo $errors['limit_amt'] ?? $errors['limit_error'] ?? ''; ?>
-            </div>
-        <?php endif; ?>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="page-title mb-1">Categories & Budget Limits</h1>
+            <p class="subtitle mb-0">Set weekly expenditure limits on categories to keep your spending in check.</p>
+        </div>
     </div>
 
-    <!-- ===== EXPENSE CATEGORIES ===== -->
-    <div class="section-title expense-title">
-        <i class="bi bi-credit-card"></i>
-        Expense Categories
+    <!-- Notification Alerts -->
+    <?php if (!empty($success)): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> <?php echo htmlspecialchars($success); ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+
+    <?php if (!empty($errors['limit'])): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> <?php echo htmlspecialchars($errors['limit']); ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+
+    <!-- ==================== EXPENSE CATEGORIES ==================== -->
+    <div class="d-flex align-items-center gap-2 mb-3 mt-2">
+        <i class="bi bi-credit-card-2-front text-danger fs-5"></i>
+        <h4 class="fw-bold mb-0" style="font-size: 18px;">Expense Categories (Weekly Limits)</h4>
     </div>
 
-    <div class="expense-cards">
+    <div class="row g-3 mb-5">
+        <?php foreach ($expense_cats as $cat): 
+            $cat_id   = $cat['id'];
+            $has_limit = isset($limits_map[$cat_id]);
+            $limit_val = $has_limit ? $limits_map[$cat_id] : null;
+        ?>
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <div class="glass-card h-100 d-flex flex-column justify-content-between" style="padding: 20px; border-left: 4px solid var(--expense);">
+                    <div>
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div style="width: 42px; height: 42px; border-radius: var(--radius-sm); background: var(--expense-light); color: var(--expense); display: flex; align-items: center; justify-content: center; font-size: 18px;">
+                                <i class="<?php echo getCategoryIcon($cat['name']); ?>"></i>
+                            </div>
+                            <div class="fw-bold text-dark" style="font-size: 15px;"><?php echo htmlspecialchars($cat['name']); ?></div>
+                        </div>
 
-        <div class="expense-card">
-            <div class="expense-card-header">
-                <div class="expense-icon"><i class="fas fa-shopping-cart"></i></div>
-                <div><div class="expense-name">Food & Groceries</div></div>
+                        <div class="text-muted" style="font-size: 13px; margin-bottom: 12px;">
+                            Weekly Limit: 
+                            <?php if ($has_limit): ?>
+                                <strong class="text-danger">Rs. <?php echo number_format($limit_val, 2); ?></strong>
+                            <?php else: ?>
+                                <span class="badge bg-light text-muted">Not Set</span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <button 
+                        type="button" 
+                        class="btn btn-sm btn-outline-primary w-100"
+                        onclick="openLimitModal(<?php echo $cat_id; ?>, '<?php echo addslashes(htmlspecialchars($cat['name'])); ?>', <?php echo $has_limit ? $limit_val : 0; ?>)"
+                    >
+                        <i class="bi bi-pencil-square"></i> <?php echo $has_limit ? 'Update Limit' : 'Set Limit'; ?>
+                    </button>
+                </div>
             </div>
-            <div class="expense-limit">Weekly Limit: <span class="limit-value"><?php echo $display_cat['Food & Groceries'] ?? 'Not set'; ?></span></div>
-            <button class="set-limit-btn" data-bs-toggle="modal" data-bs-target="#limitModal" onclick="setCategory('Food & Groceries', 5000)">
-                <i class="fas fa-edit"></i> Set Limit
-            </button>
-        </div>
-
-        <div class="expense-card">
-            <div class="expense-card-header">
-                <div class="expense-icon"><i class="fas fa-home"></i></div>
-                <div><div class="expense-name">Rent</div></div>
-            </div>
-            <div class="expense-limit">Weekly Limit: <span class="limit-value"><?php echo $display_cat['Rent'] ?? 'Not set'; ?></span></div>
-            <button class="set-limit-btn" data-bs-toggle="modal" data-bs-target="#limitModal" onclick="setCategory('Rent', 15000)">
-                <i class="fas fa-edit"></i> Set Limit
-            </button>
-        </div>
-
-        <div class="expense-card">
-            <div class="expense-card-header">
-                <div class="expense-icon"><i class="fas fa-bus"></i></div>
-                <div><div class="expense-name">Transportation</div></div>
-            </div>
-            <div class="expense-limit">Weekly Limit: <span class="limit-value"><?php echo $display_cat['Transportation'] ?? 'Not set'; ?></span></div>
-            <button class="set-limit-btn" data-bs-toggle="modal" data-bs-target="#limitModal" onclick="setCategory('Transportation', 2000)">
-                <i class="fas fa-edit"></i> Set Limit
-            </button>
-        </div>
-
-        <div class="expense-card">
-            <div class="expense-card-header">
-                <div class="expense-icon"><i class="fas fa-lightbulb"></i></div>
-                <div><div class="expense-name">Utilities</div></div>
-            </div>
-            <div class="expense-limit">Weekly Limit: <span class="limit-value"><?php echo $display_cat['Utilities'] ?? 'Not set'; ?></span></div>
-            <button class="set-limit-btn" data-bs-toggle="modal" data-bs-target="#limitModal" onclick="setCategory('Utilities', 3000)">
-                <i class="fas fa-edit"></i> Set Limit
-            </button>
-        </div>
-
-        <div class="expense-card">
-            <div class="expense-card-header">
-                <div class="expense-icon"><i class="fas fa-wifi"></i></div>
-                <div><div class="expense-name">Internet & Mobile</div></div>
-            </div>
-            <div class="expense-limit">Weekly Limit: <span class="limit-value"><?php echo $display_cat['Internet & Mobile'] ?? 'Not set'; ?></span></div>
-            <button class="set-limit-btn" data-bs-toggle="modal" data-bs-target="#limitModal" onclick="setCategory('Internet & Mobile', 1500)">
-                <i class="fas fa-edit"></i> Set Limit
-            </button>
-        </div>
-
-        <div class="expense-card">
-            <div class="expense-card-header">
-                <div class="expense-icon"><i class="fas fa-graduation-cap"></i></div>
-                <div><div class="expense-name">Education</div></div>
-            </div>
-            <div class="expense-limit">Weekly Limit: <span class="limit-value"><?php echo $display_cat['Education'] ?? 'Not set'; ?></span></div>
-            <button class="set-limit-btn" data-bs-toggle="modal" data-bs-target="#limitModal" onclick="setCategory('Education', 4000)">
-                <i class="fas fa-edit"></i> Set Limit
-            </button>
-        </div>
-
-        <div class="expense-card">
-            <div class="expense-card-header">
-                <div class="expense-icon"><i class="fas fa-heartbeat"></i></div>
-                <div><div class="expense-name">Healthcare</div></div>
-            </div>
-            <div class="expense-limit">Weekly Limit: <span class="limit-value"><?php echo $display_cat['Healthcare'] ?? 'Not set'; ?></span></div>
-            <button class="set-limit-btn" data-bs-toggle="modal" data-bs-target="#limitModal" onclick="setCategory('Healthcare', 3500)">
-                <i class="fas fa-edit"></i> Set Limit
-            </button>
-        </div>
-
-        <div class="expense-card">
-            <div class="expense-card-header">
-                <div class="expense-icon"><i class="fas fa-film"></i></div>
-                <div><div class="expense-name">Entertainment</div></div>
-            </div>
-            <div class="expense-limit">Weekly Limit: <span class="limit-value"><?php echo $display_cat['Entertainment'] ?? 'Not set'; ?></span></div>
-            <button class="set-limit-btn" data-bs-toggle="modal" data-bs-target="#limitModal" onclick="setCategory('Entertainment', 2500)">
-                <i class="fas fa-edit"></i> Set Limit
-            </button>
-        </div>
-
-        <div class="expense-card">
-            <div class="expense-card-header">
-                <div class="expense-icon"><i class="fas fa-shopping-bag"></i></div>
-                <div><div class="expense-name">Shopping</div></div>
-            </div>
-            <div class="expense-limit">Weekly Limit: <span class="limit-value"><?php echo $display_cat['Shopping'] ?? 'Not set'; ?></span></div>
-            <button class="set-limit-btn" data-bs-toggle="modal" data-bs-target="#limitModal" onclick="setCategory('Shopping', 4500)">
-                <i class="fas fa-edit"></i> Set Limit
-            </button>
-        </div>
-
-        <div class="expense-card">
-            <div class="expense-card-header">
-                <div class="expense-icon"><i class="fas fa-ellipsis-h"></i></div>
-                <div><div class="expense-name">Other Expenses</div></div>
-            </div>
-            <div class="expense-limit">Weekly Limit: <span class="limit-value"><?php echo $display_cat['Other Expenses'] ?? 'Not set'; ?></span></div>
-            <button class="set-limit-btn" data-bs-toggle="modal" data-bs-target="#limitModal" onclick="setCategory('Other Expenses', 2000)">
-                <i class="fas fa-edit"></i> Set Limit
-            </button>
-        </div>
-
+        <?php endforeach; ?>
     </div>
 
-    <!-- ===== INCOME CATEGORIES ===== -->
-    <div class="section-title income-title">
-        <i class="bi bi-cash"></i>
-        Income Categories
+    <!-- ==================== INCOME CATEGORIES ==================== -->
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <i class="bi bi-cash-coin text-success fs-5"></i>
+        <h4 class="fw-bold mb-0" style="font-size: 18px;">Income Categories</h4>
     </div>
 
-    <div class="income-cards">
-
-        <div class="income-card">
-            <div class="income-card-content">
-                <div class="income-icon"><i class="fas fa-money-bill-wave"></i></div>
-                <div class="income-name">Salary</div>
+    <div class="row g-3 mb-4">
+        <?php foreach ($income_cats as $cat): ?>
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <div class="glass-card" style="padding: 16px 20px; border-left: 4px solid var(--income);">
+                    <div class="d-flex align-items-center gap-3">
+                        <div style="width: 38px; height: 38px; border-radius: var(--radius-sm); background: var(--income-light); color: var(--income); display: flex; align-items: center; justify-content: center; font-size: 16px;">
+                            <i class="<?php echo getCategoryIcon($cat['name']); ?>"></i>
+                        </div>
+                        <div class="fw-bold text-dark" style="font-size: 14px;"><?php echo htmlspecialchars($cat['name']); ?></div>
+                    </div>
+                </div>
             </div>
-        </div>
-
-        <div class="income-card">
-            <div class="income-card-content">
-                <div class="income-icon"><i class="fas fa-briefcase"></i></div>
-                <div class="income-name">Business Income</div>
-            </div>
-        </div>
-
-        <div class="income-card">
-            <div class="income-card-content">
-                <div class="income-icon"><i class="fas fa-laptop-code"></i></div>
-                <div class="income-name">Freelance Work</div>
-            </div>
-        </div>
-
-        <div class="income-card">
-            <div class="income-card-content">
-                <div class="income-icon"><i class="fas fa-chart-line"></i></div>
-                <div class="income-name">Investment Returns</div>
-            </div>
-        </div>
-
-        <div class="income-card">
-            <div class="income-card-content">
-                <div class="income-icon"><i class="fas fa-building"></i></div>
-                <div class="income-name">Rental Income</div>
-            </div>
-        </div>
-
-        <div class="income-card">
-            <div class="income-card-content">
-                <div class="income-icon"><i class="fas fa-award"></i></div>
-                <div class="income-name">Bonus</div>
-            </div>
-        </div>
-
-        <div class="income-card">
-            <div class="income-card-content">
-                <div class="income-icon"><i class="fas fa-percentage"></i></div>
-                <div class="income-name">Interest Income</div>
-            </div>
-        </div>
-
-        <div class="income-card">
-            <div class="income-card-content">
-                <div class="income-icon"><i class="fas fa-gift"></i></div>
-                <div class="income-name">Gifts Received</div>
-            </div>
-        </div>
-
-        <div class="income-card">
-            <div class="income-card-content">
-                <div class="income-icon"><i class="fas fa-coins"></i></div>
-                <div class="income-name">Dividends</div>
-            </div>
-        </div>
-
-        <div class="income-card">
-            <div class="income-card-content">
-                <div class="income-icon"><i class="fas fa-plus-circle"></i></div>
-                <div class="income-name">Other Income</div>
-            </div>
-        </div>
-
+        <?php endforeach; ?>
     </div>
+
 </div>
 
-<!-- ===== SET LIMIT MODAL ===== -->
+<!-- Set Weekly Limit Modal -->
 <div class="modal fade" id="limitModal" tabindex="-1" aria-labelledby="limitModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
+        <div class="modal-content" style="border-radius: var(--radius-lg); border: none; overflow: hidden;">
 
-            <div class="modal-header">
-                <h5 class="modal-title" id="limitModalLabel">Set Weekly Limit</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header" style="background: var(--bg-main); border-bottom: 1px solid var(--border-color);">
+                <h5 class="modal-title fw-bold" id="limitModalLabel">Set Weekly Budget Limit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <div class="modal-body">
-                <form method="POST" id="limitForm">
+            <form method="POST" action="">
+                <div class="modal-body p-4">
+                    <input type="hidden" name="categoryId" id="modalCategoryId">
 
-                    <div class="mb-3">
-                        <label for="categoryName" class="form-label">Category</label>
-                        <input type="text" class="form-control" name="categoryName" id="categoryName" readonly>
+                    <div class="form-group mb-3">
+                        <label for="modalCategoryName">Category</label>
+                        <input type="text" class="form-control" id="modalCategoryName" readonly style="background: #f1f5f9;">
                     </div>
 
-                    <div class="mb-3">
-                        <label for="weeklyLimit" class="form-label">Weekly Limit Amount (Rs.)</label>
-                        <input type="number" class="form-control" name="weeklyLimit" id="weeklyLimit"
-                               placeholder="Enter weekly limit" min="0" step="100" required>
+                    <div class="form-group mb-0">
+                        <label for="modalWeeklyLimit">Weekly Limit Amount (Rs.)</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon"><i class="fas fa-rupee-sign"></i></span>
+                            <input 
+                                type="number" 
+                                class="form-control" 
+                                name="weeklyLimit" 
+                                id="modalWeeklyLimit"
+                                placeholder="Enter limit (e.g. 5000)" 
+                                min="0" 
+                                step="50" 
+                                required
+                            >
+                        </div>
                     </div>
+                </div>
 
-                    <div class="modal-footer px-0 pb-0">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn-gradient" name="submit" style="width: auto;">
-                            <i class="fas fa-save"></i> Save Limit
-                        </button>
-                    </div>
-
-                </form>
-            </div>
+                <div class="modal-footer px-4 py-3" style="background: var(--bg-main); border-top: 1px solid var(--border-color);">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" name="save_limit" class="btn-gradient">
+                        <i class="bi bi-check2"></i> Save Limit
+                    </button>
+                </div>
+            </form>
 
         </div>
     </div>
 </div>
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
-    function setCategory(categoryName, currentLimit) {
-        document.getElementById('categoryName').value = categoryName;
-        document.getElementById('weeklyLimit').value  = currentLimit;
+    function openLimitModal(categoryId, categoryName, currentLimit) {
+        document.getElementById('modalCategoryId').value = categoryId;
+        document.getElementById('modalCategoryName').value = categoryName;
+        document.getElementById('modalWeeklyLimit').value = currentLimit > 0 ? currentLimit : '';
+
+        let modal = new bootstrap.Modal(document.getElementById('limitModal'));
+        modal.show();
     }
-
-    // Auto-hide flash messages after 3 seconds
-    setTimeout(function () {
-        var successMsg = document.getElementById('flashMessage');
-        var errorMsg   = document.getElementById('flashMessageError');
-        if (successMsg) successMsg.style.display = 'none';
-        if (errorMsg)   errorMsg.style.display   = 'none';
-    }, 3000);
 </script>
-</body>
-</html>
 
-<?php include("../includes/footer.php"); ?>
+<?php
+mysqli_close($conn);
+include("../includes/footer.php");
+?>

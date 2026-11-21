@@ -1,268 +1,186 @@
- * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+/* ==========================================================================
+   LOGIN & SIGN UP PAGE STYLESHEET
+   Uses global root variables from global.css for unified brand colors
+   ========================================================================== */
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            position: relative;
-            overflow: hidden;
-        }
+body.auth-page {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    position: relative;
+    overflow-x: hidden;
+}
 
-        /* Decorative circles */
-        .circle {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-        }
+/* Decorative ambient background blur circles */
+.circle {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(40px);
+    pointer-events: none;
+    z-index: 0;
+}
 
-        .circle-1 {
-            width: 300px;
-            height: 300px;
-            top: -100px;
-            left: -100px;
-        }
+.circle-1 {
+    width: 380px;
+    height: 380px;
+    top: -120px;
+    left: -100px;
+    background: rgba(79, 70, 229, 0.15); /* Primary indigo tint */
+}
 
-        .circle-2 {
-            width: 250px;
-            height: 250px;
-            bottom: 50px;
-            left: 100px;
-            background: rgba(0, 102, 204, 0.4);
-        }
+.circle-2 {
+    width: 320px;
+    height: 320px;
+    bottom: -60px;
+    right: -80px;
+    background: rgba(16, 185, 129, 0.12); /* Income green tint */
+}
 
-        .circle-3 {
-            width: 200px;
-            height: 200px;
-            top: 50%;
-            left: 150px;
-            transform: translateY(-50%);
-            background: rgba(0, 51, 153, 0.6);
-        }
+.circle-3 {
+    width: 250px;
+    height: 250px;
+    top: 40%;
+    right: 25%;
+    background: rgba(99, 102, 241, 0.1);
+}
 
-        .circle-4 {
-            width: 180px;
-            height: 180px;
-            bottom: -50px;
-            right: -50px;
-            background: rgba(255, 255, 255, 0.15);
-        }
+/* Main Auth Card Container */
+.auth-container {
+    display: flex;
+    max-width: 960px;
+    width: 100%;
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.12);
+    border: 1px solid var(--border-color);
+    position: relative;
+    z-index: 1;
+}
 
-        .container {
-            display: flex;
-            max-width: 1100px;
-            width: 100%;
-            background: rgb(0, 213, 255);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            position: relative;
-            z-index: 1;
-        }
+/* Left Welcome Banner */
+.welcome-section {
+    flex: 1;
+    padding: 60px 48px;
+    background: linear-gradient(135deg, var(--primary) 0%, #3730a3 100%);
+    color: var(--text-light);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+}
 
-        .welcome-section {
-            flex: 1;
+.welcome-content {
+    position: relative;
+    z-index: 1;
+}
 
-            padding: 60px 50px;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
+.welcome-section .brand-icon {
+    font-size: 40px;
+    margin-bottom: 20px;
+    color: #e0e7ff;
+}
 
-        .welcome-section::before {
-            content: '';
-            position: absolute;
-            width: 200px;
-            height: 200px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            bottom: -50px;
-            left: -50px;
-        }
+.welcome-section h1 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+    color: #ffffff;
+}
 
-        .welcome-section::after {
-            content: '';
-            position: absolute;
-            width: 150px;
-            height: 150px;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 50%;
-            top: 50px;
-            left: 50px;
-        }
+.welcome-section .subtitle {
+    font-size: 14px;
+    color: #c7d2fe;
+    letter-spacing: 0.5px;
+    line-height: 1.6;
+}
 
-        .welcome-content {
-            position: relative;
-            z-index: 1;
-        }
+/* Right Login / Register Form Section */
+.login-section {
+    flex: 1.1;
+    padding: 50px 44px;
+    background: var(--bg-card);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
 
-        .welcome-section h1 {
-            font-size: 42px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            letter-spacing: 1px;
-        }
+.login-section h2 {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 6px;
+    letter-spacing: -0.5px;
+}
 
-        .welcome-section .subtitle {
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 20px;
-            opacity: 0.9;
-        }
+.login-section .description {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 28px;
+}
 
-        .welcome-section p {
-            font-size: 14px;
-            line-height: 1.6;
-            opacity: 0.85;
-        }
+/* Input Form Controls */
+.password-wrapper {
+    position: relative;
+}
 
-        .login-section {
-            flex: 1;
-            padding: 60px 50px;
-            background: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
+.show-password {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+}
 
-        .login-section h2 {
-            font-size: 32px;
-            font-weight: 700;
-            color: #1a1a1a;
-            margin-bottom: 10px;
-        }
+.show-password:hover {
+    color: var(--primary);
+}
 
-        .login-section .description {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 30px;
-        }
+/* Links */
+.signup-link {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 14px;
+    color: var(--text-muted);
+}
 
-        .form-group {
-            margin-bottom: 20px;
-            position: relative;
-        }
+.signup-link a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition);
+}
 
-        .form-group label {
-            display: block;
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
+.signup-link a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
 
-        .input-wrapper {
-            position: relative;
-        }
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .auth-container {
+        flex-direction: column;
+    }
 
-        .input-icon {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #999;
-            font-size: 16px;
-        }
+    .welcome-section {
+        padding: 40px 28px;
+        text-align: center;
+    }
 
-        .form-group input {
-            width: 100%;
-            padding: 12px 15px 12px 45px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: border-color 0.3s;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #0066cc;
-        }
-
-        .password-wrapper {
-            position: relative;
-        }
-
-        .show-password {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #0066cc;
-            font-size: 12px;
-            cursor: pointer;
-            background: none;
-            border: none;
-            font-weight: 600;
-        }
-
-        .form-options {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            font-size: 12px;
-        }
-
-        .btn-signin {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #1500ff 0%, #003366 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            margin-bottom: 15px;
-        }
-
-        .btn-signin:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 102, 204, 0.3);
-        }
-
-        .signup-link {
-            text-align: center;
-            margin-top: 25px;
-            font-size: 12px;
-            color: #666;
-        }
-
-        .signup-link a {
-            color: #0066cc;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .signup-link a:hover {
-            text-decoration: underline;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-            }
-
-            .welcome-section {
-                padding: 40px 30px;
-            }
-
-            .login-section {
-                padding: 40px 30px;
-            }
-
-            .welcome-section h1 {
-                font-size: 32px;
-            }
-        }
+    .login-section {
+        padding: 36px 24px;
+    }
+}

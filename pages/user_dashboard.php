@@ -1,519 +1,413 @@
 <?php
+// Start session for auth checks
 session_start();
-include("../includes/db_conn.php");
-include("../includes/header.php");
 
-if(!isset($_SESSION['name'])){
+// 1. Authentication check - Check BEFORE sending any HTML output
+if (!isset($_SESSION['user_id'])) {
     header("Location: ../index.php");
+    exit();
 }
 
-$user_id = $_SESSION['user_id'];
+include("../includes/db_conn.php");
+include("../includes/function.php");
 
+$user_id = (int)$_SESSION['user_id'];
+$user_name = $_SESSION['name'] ?? 'User';
+
+// 2. Fetch Weekly Metrics using prepared queries
 // Total income this week
-$total_income_sql = "SELECT SUM(amount) AS total_income FROM transactions
-WHERE user_id = $user_id AND type = 'income'
-AND YEARWEEK(created_at, 1) = YEARWEEK(CURDATE(), 1)";
+$in_stmt = mysqli_prepare($conn, "SELECT COALESCE(SUM(amount), 0) AS total_income FROM transactions
+                                  WHERE user_id = ? AND type = 'income'
+                                  AND YEARWEEK(created_at, 1) = YEARWEEK(CURDATE(), 1)");
+mysqli_stmt_bind_param($in_stmt, "i", $user_id);
+mysqli_stmt_execute($in_stmt);
+$in_row = mysqli_fetch_assoc(mysqli_stmt_get_result($in_stmt));
+mysqli_stmt_close($in_stmt);
+$weekly_income = (float)($in_row['total_income'] ?? 0);
 
 // Total expense this week
-$total_expense_sql = "SELECT SUM(amount) AS total_expense FROM transactions
-WHERE user_id = $user_id AND type = 'expense'
-AND YEARWEEK(created_at, 1) = YEARWEEK(CURDATE(), 1)";
+$ex_stmt = mysqli_prepare($conn, "SELECT COALESCE(SUM(amount), 0) AS total_expense FROM transactions
+                                  WHERE user_id = ? AND type = 'expense'
+                                  AND YEARWEEK(created_at, 1) = YEARWEEK(CURDATE(), 1)");
+mysqli_stmt_bind_param($ex_stmt, "i", $user_id);
+mysqli_stmt_execute($ex_stmt);
+$ex_row = mysqli_fetch_assoc(mysqli_stmt_get_result($ex_stmt));
+mysqli_stmt_close($ex_stmt);
+$weekly_expense = (float)($ex_row['total_expense'] ?? 0);
 
-$income_result  = mysqli_query($conn, $total_income_sql);
-$expense_result = mysqli_query($conn, $total_expense_sql);
+// Weekly Net Balance
+$weekly_net = $weekly_income - $weekly_expense;
 
-if(mysqli_num_rows($income_result) == 1)  $in_row = mysqli_fetch_assoc($income_result);
-if(mysqli_num_rows($expense_result) == 1) $ex_row = mysqli_fetch_assoc($expense_result);
-
-// Rent expenses
-$category_amt_fetch     = mysqli_query($conn,"SELECT SUM(amount) as total_rent FROM transactions WHERE category_id = 12 AND user_id = $user_id AND type = 'expense'");
-$category_amt_fetch_row = mysqli_fetch_assoc($category_amt_fetch);
-$total_rent             = $category_amt_fetch_row['total_rent'];
-
-// ===== CHART DATA =====
-
-// Income vs Expense - Last 7 days
-$trend_sql = "SELECT DATE(created_at) as date, type, SUM(amount) as total
-              FROM transactions WHERE user_id = $user_id
-              AND created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
-              GROUP BY DATE(created_at), type ORDER BY date ASC";
-$trend_result = mysqli_query($conn, $trend_sql);
+// 3. Chart Data: Income vs Expense - Last 30 days trend
+$trend_stmt = mysqli_prepare($conn, "SELECT DATE(created_at) as date, type, SUM(amount) as total
+                                     FROM transactions 
+                                     WHERE user_id = ? 
+                                       AND created_at >= DATE_SUB(CURDATE(), INTERVAL 29 DAY)
+                                     GROUP BY DATE(created_at), type 
+                                     ORDER BY date ASC");
+mysqli_stmt_bind_param($trend_stmt, "i", $user_id);
+mysqli_stmt_execute($trend_stmt);
+$trend_res = mysqli_stmt_get_result($trend_stmt);
 $trend_data = [];
-while($row = mysqli_fetch_assoc($trend_result)) $trend_data[] = $row;
+while ($t_row = mysqli_fetch_assoc($trend_res)) {
+    $trend_data[] = $t_row;
+}
+mysqli_stmt_close($trend_stmt);
 
-// Expense by Category
-$expense_cat_sql = "SELECT c.name, SUM(t.amount) as total
-                    FROM transactions t JOIN categories c ON t.category_id = c.id
-                    WHERE t.user_id = $user_id AND t.type = 'expense'
-                    GROUP BY c.name ORDER BY total DESC";
-$expense_cat_result = mysqli_query($conn, $expense_cat_sql);
+// Expense by Category (All time or recent)
+$exp_cat_stmt = mysqli_prepare($conn, "SELECT c.name, SUM(t.amount) as total
+                                       FROM transactions t 
+                                       JOIN categories c ON t.category_id = c.id
+                                       WHERE t.user_id = ? AND t.type = 'expense'
+                                       GROUP BY c.name 
+                                       ORDER BY total DESC");
+mysqli_stmt_bind_param($exp_cat_stmt, "i", $user_id);
+mysqli_stmt_execute($exp_cat_stmt);
+$exp_cat_res = mysqli_stmt_get_result($exp_cat_stmt);
 $expense_cat_data = [];
-while($row = mysqli_fetch_assoc($expense_cat_result)) $expense_cat_data[] = $row;
+while ($ec_row = mysqli_fetch_assoc($exp_cat_res)) {
+    $expense_cat_data[] = $ec_row;
+}
+mysqli_stmt_close($exp_cat_stmt);
 $total_expense_sum = array_sum(array_column($expense_cat_data, 'total'));
 
 // Income by Category
-$income_cat_sql = "SELECT c.name, SUM(t.amount) as total
-                   FROM transactions t JOIN categories c ON t.category_id = c.id
-                   WHERE t.user_id = $user_id AND t.type = 'income'
-                   GROUP BY c.name ORDER BY total DESC";
-$income_cat_result = mysqli_query($conn, $income_cat_sql);
+$inc_cat_stmt = mysqli_prepare($conn, "SELECT c.name, SUM(t.amount) as total
+                                       FROM transactions t 
+                                       JOIN categories c ON t.category_id = c.id
+                                       WHERE t.user_id = ? AND t.type = 'income'
+                                       GROUP BY c.name 
+                                       ORDER BY total DESC");
+mysqli_stmt_bind_param($inc_cat_stmt, "i", $user_id);
+mysqli_stmt_execute($inc_cat_stmt);
+$inc_cat_res = mysqli_stmt_get_result($inc_cat_stmt);
 $income_cat_data = [];
-while($row = mysqli_fetch_assoc($income_cat_result)) $income_cat_data[] = $row;
+while ($ic_row = mysqli_fetch_assoc($inc_cat_res)) {
+    $income_cat_data[] = $ic_row;
+}
+mysqli_stmt_close($inc_cat_stmt);
 $total_income_sum = array_sum(array_column($income_cat_data, 'total'));
+
+$page_title = "Dashboard - Expense Tracker";
+include("../includes/header.php");
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expense Tracker</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="../assets/user_dashboard.css">
-    <link rel="stylesheet" href="../assets/global.css">
-    <style>
-        * { box-sizing: border-box; }
-
-        /* Summary cards */
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 24px;
-            margin-bottom: 32px;
-        }
-
-        .summary-card {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .card-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-        }
-
-        .income-icon { background: linear-gradient(135deg, #10b981, #059669); }
-        .expense-icon { background: linear-gradient(135deg, #ef4444, #dc2626); }
-
-        .card-label {
-            font-size: 14px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
-        }
-
-        .card-amount {
-            font-size: 32px;
-            font-weight: 700;
-            color: var(--text-dark);
-            margin: 0;
-        }
-
-        /* Trend chart full width */
-        .chart-fullwidth {
-            margin-bottom: 28px;
-        }
-
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .chart-header h3 {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--dark);
-            margin: 0;
-        }
-
-        .chart-controls { display: flex; gap: 8px; }
-
-        .chart-btn {
-            padding: 6px 14px;
-            border: 2px solid var(--gray-200);
-            background: var(--white);
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            color: var(--gray-600);
-            font-size: 13px;
-        }
-        .chart-btn:hover  { border-color: var(--primary); color: var(--primary); }
-        .chart-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
-
-        /* Three donut charts row */
-        .triple-charts {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
-        }
-
-        .chart-badge {
-            font-size: 11px;
-            font-weight: 600;
-            padding: 3px 10px;
-            border-radius: 20px;
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-        }
-        .badge-neutral { background: #f3f4f6; color: #6b7280; }
-        .badge-expense { background: #fee2e2; color: #dc2626; }
-        .badge-income  { background: #d1fae5; color: #059669; }
-
-        .chart-stats-row {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 14px;
-            padding-top: 14px;
-            border-top: 1px solid #f3f4f6;
-        }
-
-        .chart-stat-item { text-align: center; }
-
-        .chart-stat-label {
-            font-size: 11px;
-            color: var(--gray-600);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-            margin-bottom: 4px;
-        }
-
-        .chart-stat-value {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--dark);
-            word-break: break-all;
-        }
-        .income-val  { color: #10b981; }
-        .expense-val { color: #ef4444; }
-
-        /* Responsive */
-        @media (max-width: 1200px) {
-            .triple-charts { grid-template-columns: 1fr 1fr; }
-        }
-
-        @media (max-width: 900px) {
-            .triple-charts { grid-template-columns: 1fr; }
-            .dashboard-header { flex-direction: column; align-items: flex-start; gap: 12px; }
-        }
-
-        @media (max-width: 600px) {
-            .summary-grid { grid-template-columns: 1fr; }
-            .card-amount  { font-size: 26px; }
-            .chart-fullwidth, .triple-chart-card { padding: 18px; }
-            .chart-header h3 { font-size: 15px; }
-        }
-    </style>
-</head>
-<body>
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <div class="main-content animate-fade-in">
 
-    <!-- Header -->
-    <div class="dashboard-header" style="margin-bottom: 30px;">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
         <div>
-            <h1 class="page-title">Welcome Back, <?php echo htmlspecialchars($_SESSION['name']); ?></h1>
-            <p class="subtitle" style="color: var(--text-muted); font-size: 15px;">Here's your financial overview for this week</p>
+            <h1 class="page-title mb-1">Welcome back, <?php echo htmlspecialchars($user_name); ?>!</h1>
+            <p class="subtitle mb-0">Here is your financial summary and spending analytics.</p>
         </div>
-        <div class="header-date">
-            <span class="badge badge-income" style="font-size: 14px; padding: 10px 20px;"><?php echo date("F d, Y"); ?></span>
+        <div>
+            <span class="badge bg-white text-dark shadow-sm border px-3 py-2 fw-semibold" style="font-size: 13px;">
+                <i class="bi bi-calendar-check me-2 text-primary"></i> <?php echo date("F d, Y"); ?>
+            </span>
         </div>
     </div>
 
     <!-- Summary Cards -->
-    <div class="summary-grid">
-
-        <div class="summary-card glass-card">
-            <div class="card-icon income-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                </svg>
-            </div>
-            <div class="card-content">
-                <p class="card-label">Total Income</p>
-                <h2 class="card-amount">Rs. <?php echo number_format($in_row['total_income'] ?? 0, 2); ?></h2>
-            </div>
-        </div>
-
-        <div class="summary-card glass-card">
-            <div class="card-icon expense-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/>
-                    <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>
-                </svg>
-            </div>
-            <div class="card-content">
-                <p class="card-label">Total Expense</p>
-                <h2 class="card-amount">Rs. <?php echo number_format($ex_row['total_expense'] ?? 0, 2); ?></h2>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- Trend Chart (Full Width) -->
-    <div class="chart-fullwidth glass-card animate-fade-in">
-        <div class="chart-header">
-            <h3>Income vs Expense Trend</h3>
-            <div class="chart-controls">
-                <button class="chart-btn active" onclick="loadTrend(7, this)">7D</button>
-                <button class="chart-btn" onclick="loadTrend(30, this)">1M</button>
-                <button class="chart-btn" onclick="loadTrend(365, this)">All</button>
-            </div>
-        </div>
-        <canvas id="trendChart" height="90"></canvas>
-    </div>
-
-    <!-- Three Donut Charts -->
-    <div class="triple-charts">
-
-        <!-- Income vs Expense Overview -->
-        <div class="glass-card animate-fade-in" style="animation-delay: 0.1s;">
-            <div class="chart-header">
-                <h3>Income vs Expense</h3>
-                <span class="chart-badge badge-neutral">Overview</span>
-            </div>
-            <canvas id="incomeExpenseDonut" height="180"></canvas>
-            <div class="chart-stats-row">
-                <div class="chart-stat-item">
-                    <div class="chart-stat-label">Income</div>
-                    <div class="chart-stat-value income-val">Rs. <?php echo number_format($total_income_sum, 0); ?></div>
+    <div class="row g-3 mb-4">
+        <!-- Weekly Income Card -->
+        <div class="col-lg-4 col-md-6 col-sm-12">
+            <div class="glass-card d-flex align-items-center gap-3">
+                <div style="width: 54px; height: 54px; border-radius: var(--radius-md); background: var(--income-light); color: var(--income); display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                    <i class="bi bi-arrow-down-left-circle-fill"></i>
                 </div>
-                <div class="chart-stat-item">
-                    <div class="chart-stat-label">Expense</div>
-                    <div class="chart-stat-value expense-val">Rs. <?php echo number_format($total_expense_sum, 0); ?></div>
+                <div>
+                    <div class="text-muted fw-semibold" style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Weekly Income</div>
+                    <h3 class="fw-bold mb-0 text-success" style="font-size: 24px;">
+                        Rs. <?php echo number_format($weekly_income, 2); ?>
+                    </h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weekly Expense Card -->
+        <div class="col-lg-4 col-md-6 col-sm-12">
+            <div class="glass-card d-flex align-items-center gap-3">
+                <div style="width: 54px; height: 54px; border-radius: var(--radius-md); background: var(--expense-light); color: var(--expense); display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                    <i class="bi bi-arrow-up-right-circle-fill"></i>
+                </div>
+                <div>
+                    <div class="text-muted fw-semibold" style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Weekly Expense</div>
+                    <h3 class="fw-bold mb-0 text-danger" style="font-size: 24px;">
+                        Rs. <?php echo number_format($weekly_expense, 2); ?>
+                    </h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weekly Net Balance Card -->
+        <div class="col-lg-4 col-md-12 col-sm-12">
+            <div class="glass-card d-flex align-items-center gap-3">
+                <div style="width: 54px; height: 54px; border-radius: var(--radius-md); background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                    <i class="bi bi-wallet-fill"></i>
+                </div>
+                <div>
+                    <div class="text-muted fw-semibold" style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Weekly Net Balance</div>
+                    <h3 class="fw-bold mb-0 <?php echo ($weekly_net >= 0) ? 'text-dark' : 'text-danger'; ?>" style="font-size: 24px;">
+                        Rs. <?php echo number_format($weekly_net, 2); ?>
+                    </h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trend Line Chart -->
+    <div class="glass-card mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <h4 class="fw-bold mb-0" style="font-size: 17px;">Income vs Expense Trend</h4>
+            <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-outline-primary active" id="btn7d" onclick="filterTrend(7, this)">7 Days</button>
+                <button type="button" class="btn btn-outline-primary" id="btn30d" onclick="filterTrend(30, this)">30 Days</button>
+            </div>
+        </div>
+        <div style="position: relative; height: 280px; width: 100%;">
+            <canvas id="trendChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Three Donut Breakdown Charts -->
+    <div class="row g-4">
+        <!-- Income vs Expense Overall -->
+        <div class="col-lg-4 col-md-6 col-sm-12">
+            <div class="glass-card h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0" style="font-size: 15px;">All-Time Cashflow</h5>
+                    <span class="badge bg-light text-muted">Overview</span>
+                </div>
+                <div style="position: relative; height: 200px;">
+                    <canvas id="overviewDonut"></canvas>
+                </div>
+                <div class="d-flex justify-content-around mt-3 pt-3 border-top text-center" style="font-size: 13px;">
+                    <div>
+                        <div class="text-muted">Total Income</div>
+                        <strong class="text-success">Rs. <?php echo number_format($total_income_sum, 0); ?></strong>
+                    </div>
+                    <div>
+                        <div class="text-muted">Total Expense</div>
+                        <strong class="text-danger">Rs. <?php echo number_format($total_expense_sum, 0); ?></strong>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Expense by Category -->
-        <div class="glass-card animate-fade-in" style="animation-delay: 0.2s;">
-            <div class="chart-header">
-                <h3>Expense Breakdown</h3>
-                <span class="chart-badge badge-expense">by Category</span>
-            </div>
-            <canvas id="expenseCategoryDonut" height="180"></canvas>
-            <div class="chart-stats-row">
-                <div class="chart-stat-item">
-                    <div class="chart-stat-label">Total</div>
-                    <div class="chart-stat-value expense-val">Rs. <?php echo number_format($total_expense_sum, 0); ?></div>
+        <div class="col-lg-4 col-md-6 col-sm-12">
+            <div class="glass-card h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0" style="font-size: 15px;">Expense by Category</h5>
+                    <span class="badge-expense"><?php echo count($expense_cat_data); ?> Categories</span>
                 </div>
-                <div class="chart-stat-item">
-                    <div class="chart-stat-label">Categories</div>
-                    <div class="chart-stat-value"><?php echo count($expense_cat_data); ?></div>
+                <div style="position: relative; height: 200px;">
+                    <canvas id="expenseCategoryDonut"></canvas>
+                </div>
+                <div class="d-flex justify-content-around mt-3 pt-3 border-top text-center" style="font-size: 13px;">
+                    <div>
+                        <div class="text-muted">Total Spent</div>
+                        <strong class="text-danger">Rs. <?php echo number_format($total_expense_sum, 0); ?></strong>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Income by Category -->
-        <div class="glass-card animate-fade-in" style="animation-delay: 0.3s;">
-            <div class="chart-header">
-                <h3>Income Breakdown</h3>
-                <span class="chart-badge badge-income">by Category</span>
-            </div>
-            <canvas id="incomeCategoryDonut" height="180"></canvas>
-            <div class="chart-stats-row">
-                <div class="chart-stat-item">
-                    <div class="chart-stat-label">Total</div>
-                    <div class="chart-stat-value income-val">Rs. <?php echo number_format($total_income_sum, 0); ?></div>
+        <div class="col-lg-4 col-md-12 col-sm-12">
+            <div class="glass-card h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0" style="font-size: 15px;">Income by Category</h5>
+                    <span class="badge-income"><?php echo count($income_cat_data); ?> Categories</span>
                 </div>
-                <div class="chart-stat-item">
-                    <div class="chart-stat-label">Categories</div>
-                    <div class="chart-stat-value"><?php echo count($income_cat_data); ?></div>
+                <div style="position: relative; height: 200px;">
+                    <canvas id="incomeCategoryDonut"></canvas>
+                </div>
+                <div class="d-flex justify-content-around mt-3 pt-3 border-top text-center" style="font-size: 13px;">
+                    <div>
+                        <div class="text-muted">Total Earned</div>
+                        <strong class="text-success">Rs. <?php echo number_format($total_income_sum, 0); ?></strong>
+                    </div>
                 </div>
             </div>
         </div>
-
     </div>
 
 </div>
 
+<!-- Charts Script -->
 <script>
-var trendRaw        = <?php echo json_encode($trend_data); ?>;
-var expenseCatRaw   = <?php echo json_encode($expense_cat_data); ?>;
-var incomeCatRaw    = <?php echo json_encode($income_cat_data); ?>;
-var totalExpenseSum = <?php echo (float)($total_expense_sum ?: 0); ?>;
-var totalIncomeSum  = <?php echo (float)($total_income_sum ?: 0); ?>;
+    const trendRaw        = <?php echo json_encode($trend_data); ?>;
+    const expenseCatRaw   = <?php echo json_encode($expense_cat_data); ?>;
+    const incomeCatRaw    = <?php echo json_encode($income_cat_data); ?>;
+    const totalExpenseSum = <?php echo (float)($total_expense_sum ?: 0); ?>;
+    const totalIncomeSum  = <?php echo (float)($total_income_sum ?: 0); ?>;
 
-var EXPENSE_COLORS = ['#ef4444','#f97316','#f59e0b','#84cc16','#14b8a6','#8b5cf6','#ec4899','#06b6d4'];
-var INCOME_COLORS  = ['#10b981','#3b82f6','#a855f7','#22d3ee','#f59e0b','#6366f1','#34d399','#60a5fa'];
+    const EXPENSE_PALETTE = ['#ef4444', '#f97316', '#f59e0b', '#84cc16', '#14b8a6', '#8b5cf6', '#ec4899', '#06b6d4'];
+    const INCOME_PALETTE  = ['#10b981', '#3b82f6', '#a855f7', '#22d3ee', '#f59e0b', '#6366f1', '#34d399', '#60a5fa'];
 
-Chart.defaults.font.family = "'Inter', -apple-system, sans-serif";
-Chart.defaults.color        = '#6b7280';
+    Chart.defaults.font.family = "'Inter', -apple-system, sans-serif";
+    Chart.defaults.color        = '#64748b';
 
-function formatRs(val) {
-    return 'Rs. ' + parseFloat(val).toLocaleString('en-IN');
-}
+    let trendChartInstance = null;
 
-function trimData(labels, values, colors, max) {
-    if (labels.length <= max) return { labels: labels, values: values, colors: colors };
-    var other = values.slice(max - 1).reduce(function(a, b){ return a + b; }, 0);
-    return {
-        labels: labels.slice(0, max - 1).concat('Other'),
-        values: values.slice(0, max - 1).concat(other),
-        colors: colors.slice(0, max - 1).concat('#9ca3af')
-    };
-}
+    function filterTrend(days, button) {
+        document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active'));
+        if (button) button.classList.add('active');
 
-function makeDoughnut(id, labels, values, colors, total) {
-    new Chart(document.getElementById(id), {
+        let cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - (days - 1));
+        cutoff.setHours(0, 0, 0, 0);
+
+        let incomeMap = {}, expenseMap = {};
+        trendRaw.forEach(item => {
+            let itemDate = new Date(item.date);
+            if (itemDate >= cutoff) {
+                if (item.type === 'income') {
+                    incomeMap[item.date] = parseFloat(item.total);
+                } else {
+                    expenseMap[item.date] = parseFloat(item.total);
+                }
+            }
+        });
+
+        let dateList = [];
+        for (let i = days - 1; i >= 0; i--) {
+            let d = new Date();
+            d.setDate(d.getDate() - i);
+            dateList.push(d.toISOString().slice(0, 10));
+        }
+
+        let labels = dateList.map(d => {
+            let dt = new Date(d);
+            return dt.toLocaleDateString('en', { month: 'short', day: 'numeric' });
+        });
+        let incomeVals  = dateList.map(d => incomeMap[d] || 0);
+        let expenseVals = dateList.map(d => expenseMap[d] || 0);
+
+        if (trendChartInstance) {
+            trendChartInstance.destroy();
+        }
+
+        const ctx = document.getElementById('trendChart').getContext('2d');
+        trendChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Income',
+                        data: incomeVals,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.08)',
+                        fill: true,
+                        tension: 0.35,
+                        pointBackgroundColor: '#10b981',
+                        pointRadius: 4
+                    },
+                    {
+                        label: 'Expense',
+                        data: expenseVals,
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.08)',
+                        fill: true,
+                        tension: 0.35,
+                        pointBackgroundColor: '#ef4444',
+                        pointRadius: 4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { boxWidth: 12, usePointStyle: true } }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#f1f5f9' },
+                        ticks: {
+                            callback: v => 'Rs. ' + v.toLocaleString()
+                        }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    }
+
+    // Initialize trend with 7 days
+    filterTrend(7, document.getElementById('btn7d'));
+
+    // Overview Donut Chart
+    new Chart(document.getElementById('overviewDonut'), {
         type: 'doughnut',
         data: {
-            labels: labels,
+            labels: ['Income', 'Expense'],
             datasets: [{
-                data: values,
-                backgroundColor: colors,
+                data: [totalIncomeSum, totalExpenseSum],
+                backgroundColor: ['#10b981', '#ef4444'],
                 borderWidth: 2,
-                borderColor: '#fff',
-                hoverOffset: 8
+                borderColor: '#ffffff'
             }]
         },
         options: {
             responsive: true,
-            cutout: '65%',
+            maintainAspectRatio: false,
+            cutout: '70%',
             plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: { padding: 8, font: { size: 10 }, usePointStyle: true, boxWidth: 8 }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(ctx) {
-                            var pct = total > 0 ? ((ctx.parsed / total) * 100).toFixed(1) : 0;
-                            return ' ' + formatRs(ctx.parsed) + ' (' + pct + '%)';
-                        }
+                legend: { position: 'bottom', labels: { boxWidth: 10, usePointStyle: true } }
+            }
+        }
+    });
+
+    // Helper for category donuts
+    function renderCategoryDonut(canvasId, rawData, colors) {
+        let labels = rawData.map(r => r.name);
+        let values = rawData.map(r => parseFloat(r.total));
+        
+        if (labels.length === 0) {
+            labels = ['No Data'];
+            values = [1];
+            colors = ['#e2e8f0'];
+        }
+
+        new Chart(document.getElementById(canvasId), {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: colors,
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { boxWidth: 10, usePointStyle: true, font: { size: 11 } }
                     }
                 }
             }
-        }
-    });
-}
-
-// ===== 1. TREND CHART =====
-var trendInstance = null;
-
-function loadTrend(days, btn) {
-    document.querySelectorAll('.chart-btn').forEach(function(b){ b.classList.remove('active'); });
-    btn.classList.add('active');
-
-    var cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - (days - 1));
-    cutoff.setHours(0,0,0,0);
-
-    var incomeMap = {}, expenseMap = {};
-    trendRaw.forEach(function(r) {
-        if (new Date(r.date) >= cutoff) {
-            if (r.type === 'income') incomeMap[r.date] = parseFloat(r.total);
-            else expenseMap[r.date] = parseFloat(r.total);
-        }
-    });
-
-    // Build date list from available data
-    var allDates = {};
-    Object.keys(incomeMap).forEach(function(d){ allDates[d] = 1; });
-    Object.keys(expenseMap).forEach(function(d){ allDates[d] = 1; });
-
-    // If no data in range, build last 7 days skeleton
-    if (Object.keys(allDates).length === 0) {
-        for (var i = 6; i >= 0; i--) {
-            var d = new Date();
-            d.setDate(d.getDate() - i);
-            allDates[d.toISOString().slice(0,10)] = 1;
-        }
+        });
     }
 
-    var useDates = Object.keys(allDates).sort();
-    var labels      = useDates.map(function(d){ var dt = new Date(d); return dt.toLocaleDateString('en', {month:'short', day:'numeric'}); });
-    var incomeVals  = useDates.map(function(d){ return incomeMap[d]  || 0; });
-    var expenseVals = useDates.map(function(d){ return expenseMap[d] || 0; });
-
-    if (trendInstance) trendInstance.destroy();
-
-    trendInstance = new Chart(document.getElementById('trendChart'), {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'Income',
-                    data: incomeVals,
-                    borderColor: '#10b981',
-                    backgroundColor: 'rgba(16,185,129,0.08)',
-                    fill: true, tension: 0.4,
-                    pointBackgroundColor: '#10b981',
-                    pointBorderColor: '#fff', pointBorderWidth: 2,
-                    pointRadius: 5, borderWidth: 3
-                },
-                {
-                    label: 'Expense',
-                    data: expenseVals,
-                    borderColor: '#ef4444',
-                    backgroundColor: 'rgba(239,68,68,0.08)',
-                    fill: true, tension: 0.4,
-                    pointBackgroundColor: '#ef4444',
-                    pointBorderColor: '#fff', pointBorderWidth: 2,
-                    pointRadius: 5, borderWidth: 3
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            interaction: { mode: 'index', intersect: false },
-            plugins: {
-                legend: { position: 'top', labels: { usePointStyle: true, padding: 20 } },
-                tooltip: { callbacks: { label: function(ctx){ return ' ' + formatRs(ctx.parsed.y); } } }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: '#f3f4f6' },
-                    ticks: { callback: function(v){ return 'Rs.' + v.toLocaleString('en-IN'); } }
-                },
-                x: { grid: { display: false } }
-            }
-        }
-    });
-}
-
-loadTrend(7, document.querySelector('.chart-btn.active'));
-
-// ===== 2. INCOME VS EXPENSE OVERVIEW =====
-makeDoughnut(
-    'incomeExpenseDonut',
-    ['Total Income', 'Total Expense'],
-    [totalIncomeSum, totalExpenseSum],
-    ['#10b981', '#ef4444'],
-    totalIncomeSum + totalExpenseSum
-);
-
-// ===== 3. EXPENSE BY CATEGORY =====
-(function(){
-    var labels  = expenseCatRaw.map(function(r){ return r.name; });
-    var values  = expenseCatRaw.map(function(r){ return parseFloat(r.total); });
-    var trimmed = trimData(labels, values, EXPENSE_COLORS, 7);
-    makeDoughnut('expenseCategoryDonut', trimmed.labels, trimmed.values, trimmed.colors, totalExpenseSum);
-})();
-
-// ===== 4. INCOME BY CATEGORY =====
-(function(){
-    var labels  = incomeCatRaw.map(function(r){ return r.name; });
-    var values  = incomeCatRaw.map(function(r){ return parseFloat(r.total); });
-    var trimmed = trimData(labels, values, INCOME_COLORS, 7);
-    makeDoughnut('incomeCategoryDonut', trimmed.labels, trimmed.values, trimmed.colors, totalIncomeSum);
-})();
+    renderCategoryDonut('expenseCategoryDonut', expenseCatRaw, EXPENSE_PALETTE);
+    renderCategoryDonut('incomeCategoryDonut', incomeCatRaw, INCOME_PALETTE);
 </script>
 
-</body>
-</html>
-
-<?php include("../includes/footer.php"); ?>
+<?php
+mysqli_close($conn);
+include("../includes/footer.php");
+?>

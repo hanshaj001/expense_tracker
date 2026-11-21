@@ -1,269 +1,306 @@
-/* Premium Global Variables - Modern Minimal */
+/* ==========================================================================
+   GLOBAL DESIGN SYSTEM & STYLESHEET
+   Expense Tracker Application
+   Simple comments included to easily understand and maintain colors & styles
+   ========================================================================== */
+
+/* 1. Import modern, clean font (Inter) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* 2. Global Root Colors & Variables - Change colors here to update across the entire app */
 :root {
-    --primary: #6366f1; /* Indigo 500 */
-    --primary-hover: #4f46e5; /* Indigo 600 */
-    --secondary: #8b5cf6; /* Violet 500 */
-    
-    --bg-main: #f8fafc; /* Slate 50 */
-    --card-bg: #ffffff;
-    
-    --text-dark: #0f172a; /* Slate 900 */
-    --text-muted: #64748b; /* Slate 500 */
-    --text-light: #ffffff;
-    
-    --border-color: #e2e8f0; /* Slate 200 */
-    --danger: #ef4444; /* Red 500 */
-    --success: #10b981; /* Emerald 500 */
-    
-    --radius-sm: 6px;
+    /* Primary Brand Colors (Modern Indigo) */
+    --primary: #4f46e5;           /* Main buttons, active sidebar tabs, brand highlights */
+    --primary-hover: #4338ca;     /* Button hover state */
+    --primary-light: #eef2ff;    /* Light background tint for active items */
+    --primary-border: #c7d2fe;   /* Border for primary active items */
+
+    /* Financial Status Colors */
+    --income: #10b981;           /* Green for income and positive metrics */
+    --income-hover: #059669;
+    --income-light: #ecfdf5;     /* Light green background for income badges */
+
+    --expense: #ef4444;          /* Red for expense, danger, delete actions */
+    --expense-hover: #dc2626;
+    --expense-light: #fef2f2;    /* Light red background for expense badges */
+
+    --warning: #f59e0b;          /* Amber for warnings and alerts */
+    --warning-light: #fffbeb;
+
+    /* Backgrounds */
+    --bg-main: #f8fafc;          /* Main application background (Slate 50) */
+    --bg-card: #ffffff;          /* Card background */
+    --bg-sidebar: #ffffff;       /* Sidebar background */
+
+    /* Text Colors */
+    --text-dark: #0f172a;        /* Primary headings and text (Slate 900) */
+    --text-muted: #64748b;       /* Subtitles, secondary text (Slate 500) */
+    --text-light: #ffffff;       /* Text on colored buttons */
+
+    /* Borders & Dividers */
+    --border-color: #e2e8f0;     /* Subtle border line (Slate 200) */
+    --border-focus: #818cf8;     /* Input focus border */
+
+    /* Border Radius for smooth rounded corners */
+    --radius-sm: 8px;
     --radius-md: 12px;
     --radius-lg: 16px;
-    
-    --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-    --shadow-hover: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-    
-    --transition: all 0.25s ease-in-out;
+
+    /* Clean Shadows */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.03);
+
+    /* Animation transition */
+    --transition: all 0.2s ease-in-out;
+}
+
+/* 3. Base Body Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: var(--bg-main);
+    background-color: var(--bg-main);
     color: var(--text-dark);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
 }
 
-/* Beautiful Modern Card */
+/* 4. Common Card Component */
 .glass-card {
-    background: var(--card-bg);
+    background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-soft);
-    padding: 32px;
+    box-shadow: var(--shadow-md);
+    padding: 28px;
     position: relative;
     transition: var(--transition);
 }
+
 .glass-card:hover {
-    box-shadow: var(--shadow-hover);
+    box-shadow: var(--shadow-lg);
 }
 
-/* Page Titles */
+/* 5. Page Titles & Headers */
 .page-title {
-    font-size: 26px;
+    font-size: 24px;
     font-weight: 700;
     color: var(--text-dark);
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     letter-spacing: -0.5px;
 }
 
-/* Modern Form Group */
+.subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+/* 6. Form Styling */
 .form-group {
-    margin-bottom: 22px;
+    margin-bottom: 20px;
 }
 
 .form-group label {
     display: block;
     font-size: 14px;
     color: var(--text-dark);
-    margin-bottom: 8px;
-    font-weight: 600;
+    margin-bottom: 6px;
+    font-weight: 500;
 }
 
 .input-wrapper {
     position: relative;
+    display: flex;
+    align-items: center;
 }
 
 .input-icon {
     position: absolute;
-    left: 16px;
-    top: 50%;
-    transform: translateY(-50%);
+    left: 14px;
     color: var(--text-muted);
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    font-size: 15px;
+    pointer-events: none;
     transition: var(--transition);
 }
 
 .form-control {
     width: 100%;
-    padding: 12px 16px 12px 44px;
+    padding: 11px 16px 11px 42px;
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
-    font-size: 15px;
-    background: var(--card-bg);
-    transition: var(--transition);
+    font-size: 14px;
+    background: var(--bg-card);
     color: var(--text-dark);
+    transition: var(--transition);
 }
 
 .form-control:focus {
     outline: none;
     border-color: var(--primary);
-    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
 }
 
-.form-control:focus + .input-icon, 
 .input-wrapper:focus-within .input-icon {
     color: var(--primary);
 }
 
-/* Validation Errors */
-.error-msg {
-    color: var(--danger);
+/* Textarea input fix */
+textarea.form-control {
+    padding-left: 42px;
+    min-height: 90px;
+    resize: vertical;
+}
+
+/* 7. Button Styles */
+.btn-gradient,
+.btn-primary-custom {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 22px;
+    background: var(--primary);
+    color: var(--text-light);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-gradient:hover,
+.btn-primary-custom:hover {
+    background: var(--primary-hover);
+    color: var(--text-light);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-danger-custom {
+    background: var(--expense);
+    color: var(--text-light);
+    border: none;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
     font-size: 13px;
-    margin-top: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.btn-danger-custom:hover {
+    background: var(--expense-hover);
+    color: var(--text-light);
+}
+
+/* 8. Messages & Alerts */
+.error-msg {
+    color: var(--expense);
+    font-size: 13px;
+    margin-top: 5px;
     display: block;
     font-weight: 500;
 }
 
 .success-msg {
-    color: var(--success);
+    color: var(--income-hover);
+    background: var(--income-light);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
     font-size: 14px;
-    margin-top: 16px;
-    display: block;
     font-weight: 600;
     text-align: center;
-    background: rgba(16, 185, 129, 0.1);
-    padding: 12px;
-    border-radius: var(--radius-md);
-    border: 1px solid rgba(16, 185, 129, 0.2);
+    margin-top: 15px;
+    display: block;
 }
 
-/* Modern Buttons */
-.btn-gradient {
-    width: 100%;
-    padding: 12px 20px;
-    background: var(--primary);
-    color: var(--text-light);
-    border: none;
-    border-radius: var(--radius-md);
-    font-size: 15px;
+/* 9. Badges */
+.badge-income {
+    background-color: var(--income-light);
+    color: var(--income);
     font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.3);
-    position: relative;
-    overflow: hidden;
+    gap: 4px;
 }
 
-/* Button Ripple Effect */
-.btn-gradient .ripple {
-    position: absolute;
-    border-radius: 50%;
-    transform: scale(0);
-    animation: ripple 0.6s linear;
-    background-color: rgba(255, 255, 255, 0.4);
-}
-
-@keyframes ripple {
-    to {
-        transform: scale(4);
-        opacity: 0;
-    }
-}
-
-.btn-gradient:hover {
-    background: var(--primary-hover);
-    transform: translateY(-1px);
-    box-shadow: 0 6px 10px -1px rgba(99, 102, 241, 0.4);
-}
-
-/* Link Styles */
-.styled-link {
-    color: var(--primary);
-    text-decoration: none;
+.badge-expense {
+    background-color: var(--expense-light);
+    color: var(--expense);
     font-weight: 600;
-    transition: var(--transition);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
 }
 
-.styled-link:hover {
-    color: var(--primary-hover);
-    text-decoration: underline;
+/* 10. Table Styling */
+.table-responsive-wrapper {
+    overflow-x: auto;
+    border-radius: var(--radius-md);
 }
 
-/* Animations */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.animate-fade-in {
-    animation: fadeIn 0.4s ease-out forwards;
-}
-
-/* Table Design */
 .premium-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    margin-top: 16px;
-}
-
-.premium-table th {
-    background: var(--bg-main);
-    color: var(--text-muted);
-    font-size: 13px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    padding: 14px 16px;
-    border-bottom: 2px solid var(--border-color);
     text-align: left;
 }
 
-.premium-table th:first-child { border-top-left-radius: var(--radius-md); }
-.premium-table th:last-child { border-top-right-radius: var(--radius-md); }
-
-.premium-table td {
-    padding: 16px;
-    border-bottom: 1px solid var(--border-color);
-    color: var(--text-dark);
-    font-size: 14px;
-    transition: var(--transition);
-}
-
-.premium-table tr:hover td {
-    background: var(--bg-main);
-}
-
-/* Badges */
-.badge {
-    padding: 4px 10px;
-    border-radius: 9999px;
+.premium-table thead th {
+    background: #f1f5f9;
+    color: var(--text-muted);
     font-size: 12px;
+    text-transform: uppercase;
     font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    letter-spacing: 0.5px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border-color);
 }
 
-.badge-expense { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
-.badge-income { background: #dcfce3; color: #16a34a; border: 1px solid #bbf7d0; }
+.premium-table tbody td {
+    padding: 14px 18px;
+    font-size: 14px;
+    color: var(--text-dark);
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-card);
+    vertical-align: middle;
+}
 
-/* Responsive Adjustments */
-@media (max-width: 768px) {
-    .glass-card {
-        padding: 20px;
-        border-radius: var(--radius-md);
+.premium-table tbody tr:hover td {
+    background-color: #f8fafc;
+}
+
+.premium-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* 11. Subtle Fade Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
     }
-    
-    .page-title {
-        font-size: 22px;
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
-    
-    .form-control {
-        padding: 12px 15px 12px 40px;
-    }
-    
-    .premium-table th, .premium-table td {
-        padding: 12px 10px;
-        font-size: 13px;
-    }
-    
-    .premium-table-wrapper {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
 }
